@@ -4,15 +4,17 @@ from flask import request
 from flask import redirect, url_for
 from flask_security import login_required
 
+
+from mongoengine.queryset.visitor import Q
+
 from math import ceil
 
-from database import db, Post
+from database import Post # db, 
 
 from .forms import PostForm
 
 posts = Blueprint('posts', __name__, template_folder='templates')
 
-r = '.*'
 
 # http://localhost/blog/create
 @posts.route('/create', methods=['POST', 'GET'])
@@ -24,9 +26,7 @@ def create_post():
         body = request.form.get('body')
 
         try:
-            post = {'title': title, 'body': body}
-            post = Post(post)
-            db.posts.insert_one(post.obj())
+            Post(title=title, body=body).save()
         except:
             print("Something went wrong")
         
@@ -39,19 +39,20 @@ def create_post():
 
 
 
+# TODO do smth with form it should be filled with current title etc
 
 @posts.route('/edit/<slug>', methods=['POST', 'GET'])
 @login_required
 def edit_post(slug):
     try: 
-        post = db.posts.find_one({'slug': slug})
+        post = Post.objects(slug=slug)
 
         if request.method == 'POST':
             title = request.form.get('title')
             body = request.form.get('body')
 
             try:
-                db.posts.update_one({'slug': slug}, {'$set': {'title': title, 'body': body}})
+                post.update(title=title, body=body)
             except:
                 print("Something went wrong")
         
@@ -65,53 +66,46 @@ def edit_post(slug):
 
 
 
-# posts = Post.objects()
-
 @posts.route('/')
 def index():
 
     q = request.args.get('q')
-
     page = request.args.get('page')
 
     if page and page.isdigit():
         page = int(page)
     else: page = 1
 
-    totalPosts = db.posts.count_documents({})
-    postsPerPage = 5
-    totalPages = ceil(totalPosts / postsPerPage)
-    skip = (page-1) * postsPerPage
-    
-    if q: # This is probably can be done with creating indexed and using text search
-        q = r+q+r # THis beautiful piece of code is for searching with regex
-        posts = db.posts.find({'$or': 
-            [{'title': {'$regex': q, '$options': 'i'}}, 
-            {'body': {'$regex': q, '$options':'i'}}]}).sort('date').skip(skip).limit(postsPerPage)
-    else: 
-        posts = db.posts.find({}).sort('date').skip(skip).limit(postsPerPage)
+    total_posts = Post.objects.count()
+    posts_per_page = 5
+    total_pages = ceil(total_posts / posts_per_page)
+    skip = (page-1) * posts_per_page
 
-    posts = list(posts)
-        
-    return render_template('posts/index.html', posts=posts, page=page, totalPages=totalPages)
+    if q: 
+        posts = Post.objects(Q(title__icontains=q) | 
+                    Q(body__icontains=q)).order_by('date').skip(skip).limit(posts_per_page)
+    else: 
+        posts = Post.objects.order_by('date').skip(skip).limit(posts_per_page)
+
+    return render_template('posts/index.html', posts=posts, page=page, totalPages=total_pages)
 
 
 # http://localhost/blog/first-post
 @posts.route('/<slug>')
 def post_detail(slug):
     try: 
-        post = list(db.posts.find({ "slug": slug }))[0]
-        tags = post.get('tags')
+        post = Post.objects(slug=slug).first()
+        tags = post.tags
         return render_template('posts/post_detail.html', post=post, tags=tags)
-    except IndexError:
+    except:
         return render_template('404.html'), 404
 
 # http://localhost/blog/tag/fuck
 @posts.route('/tag/<slug>')
 def tag_detail(slug):
     try: 
-        posts = list(db.posts.find({'tags': {'$elemMatch': {'slug': slug}}}))
-        tag = [tag for tag in posts[0]['tags'] if tag['slug'] == slug][0]
+        posts = Post.objects(tags__match={'slug': slug})
+        tag = posts[0].tags.get(slug=slug)
         return render_template('posts/tag_detail.html', tag=tag, posts=posts)
-    except IndexError:
+    except:
         return render_template('404.html'), 404
