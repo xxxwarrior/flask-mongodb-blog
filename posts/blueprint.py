@@ -1,17 +1,14 @@
-from flask import Blueprint
-from flask import render_template
-from flask import request
-from flask import redirect, url_for
-from flask_security import login_required
+from math import ceil
 
+from flask import Blueprint, render_template, request, \
+                redirect, url_for
+from flask_security import login_required
 
 from mongoengine.queryset.visitor import Q
 
-from math import ceil
-
 from database import Post # db, 
-
 from .forms import PostForm
+
 
 posts = Blueprint('posts', __name__, template_folder='templates')
 
@@ -39,28 +36,23 @@ def create_post():
 
 
 
-# TODO do smth with form it should be filled with current title etc
+# TODO doesn't workp properly 
 
 @posts.route('/edit/<slug>', methods=['POST', 'GET'])
 @login_required
 def edit_post(slug):
     try: 
-        post = Post.objects(slug=slug)
+        post = Post.objects(slug=slug).first()
 
         if request.method == 'POST':
-            title = request.form.get('title')
-            body = request.form.get('body')
+            form = PostForm(formdata=request.form, obj=post)
+            form.populate_obj(post)
+            post.save()
+            return redirect(url_for('posts.post_detail', slug=slug))
 
-            try:
-                post.update(title=title, body=body)
-            except:
-                print("Something went wrong")
-        
-            return redirect(url_for('posts.post_detail', slug=post['slug']))
-        
         form = PostForm(obj=post)
         return render_template('posts/edit_post.html', post=post, form=form)
-    except IndexError:
+    except:
         return render_template('404.html'), 404
 
 
@@ -83,7 +75,7 @@ def index():
 
     if q: 
         posts = Post.objects(Q(title__icontains=q) | 
-                    Q(body__icontains=q)).order_by('date').skip(skip).limit(posts_per_page)
+                             Q(body__icontains=q)).order_by('date').skip(skip).limit(posts_per_page)
     else: 
         posts = Post.objects.order_by('date').skip(skip).limit(posts_per_page)
 

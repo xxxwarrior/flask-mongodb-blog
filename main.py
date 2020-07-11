@@ -1,4 +1,4 @@
-from app import app, db
+from app import app
 from posts.blueprint import posts
 import view
 

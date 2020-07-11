@@ -4,9 +4,8 @@ import re
 
 from bson.objectid import ObjectId
 
-from flask_admin.contrib.pymongo import ModelView, filters
 from flask_security import UserMixin, RoleMixin
-
+from flask_admin.contrib.mongoengine import ModelView, filters
 from mongoengine import connect, Document, IntField, \
                         StringField, BooleanField, ReferenceField, \
                         ListField, DateTimeField, ObjectIdField, \
@@ -19,6 +18,13 @@ from config import Config
 
 connect(
     db='testposts',
+    alias='posts-db',
+    host=Config.DB_URI
+)
+
+connect(
+    db='test',
+    alias='default',
     host=Config.DB_URI
 )
 
@@ -31,6 +37,8 @@ def slugify(s):
     return re.sub(pattern, '-', s).lower()
 
 
+
+
 class Tag(EmbeddedDocument):
 
     name = StringField(max_length=140)
@@ -41,64 +49,38 @@ class Tag(EmbeddedDocument):
         if self.name:
             self.slug = slugify(self.name)
 
-    # def __repr__(self):
-    #     return f'Tag name: {self.name}'
+    def __repr__(self):
+        return f'"{self.name}" tag'
 
-    # def obj(self):
-    #     return {
-    #         'name': self.name,
-    #         'slug': self.slug
-    #     }
 
 # TODO user and userinfo
 class Post(Document):
 
-    # _id = ObjectIdField(required=True, unique=True, primary_key=True)
     date = DateTimeField(default=datetime.now())
     title = StringField(max_length=140)
     slug = StringField(max_length=140, unique=True)
     body = StringField()
     tags = EmbeddedDocumentListField(Tag, default=[])
-    meta = {'collection': 'posts'}
+    meta = {'collection': 'posts',
+            'db_alias': 'posts-db'}
 
     def __init__(self, *args, **kwargs):
         super(Post, self).__init__(*args, **kwargs)
         self.generate_slug()
 
     def generate_slug(self):
-        if self.title:
+        if not self.slug:
             self.slug = slugify(self.title)
-        
-        
-        
-        
-        # self.tags = []
-
-        # if post: 
-        #     self.title = post['title']
-        #     self.body = post['body']
-            
-        #     if not post['slug']:
-        #         self.slug = slugify(post['title'])
-
-           
-    # def obj(self):
-    #     return {
-    #         'date': self.date,
-    #         'slug': self.slug,
-    #         'title': self.title,
-    #         'body': self.body
-    #     }
-
 
     # def __repr__(self):
-    #     return f'Post title: {self.title}'
+    #     return f'Post "{self.title}", tags: [{self.tags if self.tags else []}]'
 
  
 
 
 
 class PostView(ModelView): 
+
 
     column_list = ('title', 'date', 'body', 'tags', 'slug')
     column_sortable_list = ('title', 'date', 'tags')
@@ -119,17 +101,15 @@ class PostView(ModelView):
     form = PostForm
 
     def get_list(self, *args, **kwargs):
+        
         count, data = super(PostView, self).get_list(*args, **kwargs)
+        
 
-        # Grab user names
-        query = {'_id': {'$in': [x['_id'] for x in data]}}
-        # users = db.user.find(query, {'name': 1})
+        # users = User.objects(_id__in=[x['_id'] for x in data]).fields(_id=1, name=1)
+        # users_map = dict((x['_id'], x['name']) for x in users)
 
-        # Contribute user names to the models
-        users_map = dict((x['_id'], x['name']) for x in users)
-
-        for item in data:
-            item['user_name'] = users_map.get(item['_id'])
+        # for item in data:
+        #     item['user_name'] = users_map.get(item['_id'])
 
         return count, data
 
@@ -147,13 +127,12 @@ class PostView(ModelView):
 
 class Role(Document, RoleMixin): 
 
-    # id = IntField(primary_key=True)
     name = StringField(max_length=100, unique=True)
     description = StringField(max_length=255)
 
 class User(Document, UserMixin): 
 
-    # id = IntField(primary_key=True)
+    name = StringField(max_length=100)
     email = StringField(max_length=255, unique=True)
     password = StringField(max_length=255)
     active = BooleanField()

@@ -12,7 +12,6 @@
 
     <div class='col-md-6'>
         <form action="{{ url_for('posts.edit_post', slug=post.slug) }}" method="POST">
-
             {% for field in form %}
                 
                 <div class="form-group">
@@ -22,7 +21,7 @@
 
             {% endfor %}
 
-            <button type="submit" class="btn btn-success">Update</button>
+            <button type="submit" class="btn btn-outline-primary">Update</button>
 
         </form>
     </div>

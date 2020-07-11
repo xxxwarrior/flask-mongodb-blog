@@ -6,7 +6,9 @@
 
 {% block content_title %}
     {{ post.title }}
-
+    <a  href=" {{url_for('posts.edit_post', slug=post.slug) }} ">
+    <button type="button" class="btn btn-outline-secondary btn-sm">Edit Post</button>
+    </a>
 {% endblock %}
 
 {% block content %}
@@ -17,7 +19,7 @@
     {% if tags %}
         <div class='tags'>
             {% for tag in tags %}
-                <a href="{{ url_for('posts.tag_detail', slug=tag.slug) }}"><button type="button" class="btn btn-info">{{ tag.name }}</button> </a>
+                <a href="{{ url_for('posts.tag_detail', slug=tag.slug) }}"><button type="button" class="btn btn-info btn-sm">{{ tag.name }}</button> </a>
             {% endfor %}
         </div>
     {% endif %}
