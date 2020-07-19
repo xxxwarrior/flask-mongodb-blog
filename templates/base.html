@@ -3,16 +3,14 @@
 <head>
     <meta charset="UTF-8">
 
-
     <!-- Need to check more carefully the line with jquery -->
     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" crossorigin="anonymous"></script> -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href=" {{ url_for('static', filename='style.css') }}"> 
+    
     <title>
-
         {% block title %}
         {% endblock %} | Flask app 
-
     </title>
 
 </head>
@@ -20,7 +18,7 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <a class="navbar-brand" href=" {{ url_for('index') }} ">
-          <img src ="https://sun9-50.userapi.com/_6j14RWMrfZSo7-UI89z8CXOL8RT-w10tTdWvQ/PPl8cOQjmm0.jpg" type="image/jpg" width="50" height="50" class="img-thumbnail" alt="">
+          <img src ="https://sun9-64.userapi.com/qmmg3WLeqatxCkwvkKYeIARUwekxC-tvoi3uxg/Sku6Jh7QmhE.jpg" type="image/jpg" width="50" height="50" class="img-thumbnail" alt="">
           Home
         </a>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -35,10 +33,11 @@
                 {% endif %}
             </li>
 
-          <form class="form-inline my-0 my-lg-0" method="GET">
-            <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name="q" value="{{ request.args.get('q', '') }}">
+          <form class="form-inline my-0 my-lg-0" method="GET" action=" {{ url_for('posts.index') }}">
+            <input class="form-control mr-sm-2" type="search" name="q" value="{{ request.args.get('q', '') }}">
             <button class="btn btn-outline-primary my-2 my-sm-0" type="submit">Search</button>
           </form>
+
         </div>
 
         
@@ -67,8 +66,6 @@
       
       </div>
         
-        
-
         
     </body>
 </html>

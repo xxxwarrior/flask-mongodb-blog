@@ -38,7 +38,6 @@ def slugify(s):
 
 
 
-
 class Tag(EmbeddedDocument):
 
     name = StringField(max_length=140)
@@ -69,22 +68,15 @@ class Post(Document):
         self.generate_slug()
 
     def generate_slug(self):
-        if not self.slug:
+        if self.title:
             self.slug = slugify(self.title)
-
-    # def __repr__(self):
-    #     return f'Post "{self.title}", tags: [{self.tags if self.tags else []}]'
 
  
 
-
-
 class PostView(ModelView): 
-
 
     column_list = ('title', 'date', 'body', 'tags', 'slug')
     column_sortable_list = ('title', 'date', 'tags')
-
 
 # TODO: case insensitive search 
     column_filters = (filters.FilterEqual('title', 'Title'),

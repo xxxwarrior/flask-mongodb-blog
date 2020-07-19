@@ -1,23 +1,22 @@
 from math import ceil
 
 from flask import Blueprint, render_template, request, \
-                redirect, url_for
+                    redirect, url_for
 from flask_security import login_required
 
 from mongoengine.queryset.visitor import Q
 
-from database import Post # db, 
+from database import Post 
 from .forms import PostForm
 
 
 posts = Blueprint('posts', __name__, template_folder='templates')
 
-
+# TODO userfriendly behavior in case if smth goes wrong
 # http://localhost/blog/create
 @posts.route('/create', methods=['POST', 'GET'])
 @login_required
 def create_post(): 
-
     if request.method == 'POST':
         title = request.form.get('title')
         body = request.form.get('body')
@@ -29,14 +28,12 @@ def create_post():
         
         return redirect(url_for('posts.index'))
 
-
     form = PostForm()
     return render_template('posts/create_post.html', form=form)
 
 
 
-
-# TODO doesn't workp properly 
+# TODO Make some page for the case when update went wrong
 
 @posts.route('/edit/<slug>', methods=['POST', 'GET'])
 @login_required
@@ -45,17 +42,20 @@ def edit_post(slug):
         post = Post.objects(slug=slug).first()
 
         if request.method == 'POST':
-            form = PostForm(formdata=request.form, obj=post)
-            form.populate_obj(post)
-            post.save()
-            return redirect(url_for('posts.post_detail', slug=slug))
+            title = request.form.get('title')
+            body = request.form.get('body')
+
+            try:
+                post.update(title=title, body=body)
+            except:
+                print("Something went wrong")
+
+            return redirect(url_for('posts.index'))
 
         form = PostForm(obj=post)
         return render_template('posts/edit_post.html', post=post, form=form)
     except:
         return render_template('404.html'), 404
-
-
 
 
 @posts.route('/')
