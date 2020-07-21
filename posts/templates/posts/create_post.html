@@ -9,22 +9,6 @@
 {% endblock %}
 
 {% block content %}
-
-    <div class='col-md-6'>
-        <form action="{{ url_for('posts.create_post') }}" method="POST">
-
-            {% for field in form %}
-                
-                <div class="form-group">
-                    {{ field.label(class='control-label') }}
-                    {{ field(class='form-control') }}
-                </div>
-
-            {% endfor %}
-
-            <button type="submit" class="btn btn-success">Create</button>
-
-        </form>
-    </div>
-
+    {% from 'posts/form_macro.html' import form_macro %}
+    {{ form_macro(form, action=url_for('posts.create_post'), btn_name='Create') }}
 {% endblock %}
