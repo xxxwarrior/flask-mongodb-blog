@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-
     <!-- Need to check more carefully the line with jquery -->
     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" crossorigin="anonymous"></script> -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
@@ -12,9 +11,7 @@
         {% block title %}
         {% endblock %} | Flask app 
     </title>
-
 </head>
-    
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <a class="navbar-brand" href=" {{ url_for('index') }} ">
@@ -37,9 +34,7 @@
             <input class="form-control mr-sm-2" type="search" name="q" value="{{ request.args.get('q', '') }}">
             <button class="btn btn-outline-primary my-2 my-sm-0" type="submit">Search</button>
           </form>
-
         </div>
-
         
         <ul class="navbar-nav mr-auto"> 
           <li class="nav-item"></li>
@@ -50,23 +45,14 @@
         </ul>
       </nav>    
 
-
-
       <div class="container">
-        <!-- <div class="d-flex justify-content-center"> -->
           <h1>
             {% block content_title %}
             {% endblock %}
           </h1>
-        <!-- </div> -->
-        <!-- <div class="d-flex justify-content-center"> -->
           {% block content %}
           {% endblock %}
-        <!-- </div> -->
-      
       </div>
-        
-        
     </body>
 </html>
 
