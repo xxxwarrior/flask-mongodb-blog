@@ -8,8 +8,9 @@ from flask_security import UserMixin, RoleMixin
 from flask_admin.contrib.mongoengine import ModelView, filters
 from mongoengine import connect, Document, IntField, \
                         StringField, BooleanField, ReferenceField, \
-                        ListField, DateTimeField, ObjectIdField, \
+                        ListField, DateTimeField, LazyReferenceField, \
                         EmbeddedDocument, EmbeddedDocumentListField
+                        
 
 
 from posts.forms import PostForm
@@ -32,10 +33,33 @@ connect(
 # db = client.testposts # TODO change to blogDB later
 # posts = db.posts
 
+
+### Flask Security ###
+
+class Role(Document, RoleMixin): 
+
+    name = StringField(max_length=100, unique=True)
+    description = StringField(max_length=255)
+
+class User(Document, UserMixin): 
+
+    name = StringField(max_length=100)
+    email = StringField(max_length=255, unique=True)
+    password = StringField(max_length=255)
+    active = BooleanField()
+    roles = ListField(ReferenceField(Role), default=[])
+    meta = {'strict': False}
+    # would be cool to store user's posts also
+
+
+### Posts Management ###
+
+
+# TODO make better handling of slugs, their duplicate and after edition behavior
+
 def slugify(s):
     pattern = r'[\W+]'
     return re.sub(pattern, '-', s).lower()
-
 
 
 class Tag(EmbeddedDocument):
@@ -60,6 +84,7 @@ class Post(Document):
     slug = StringField(max_length=140, unique=True)
     body = StringField()
     tags = EmbeddedDocumentListField(Tag, default=[])
+    user = LazyReferenceField(User, default=None, reverse_delete_rule=1)
     meta = {'collection': 'posts',
             'db_alias': 'posts-db'}
 
@@ -72,7 +97,6 @@ class Post(Document):
             self.slug = slugify(self.title)
 
  
-
 class PostView(ModelView): 
 
     column_list = ('title', 'date', 'body', 'tags', 'slug')
@@ -114,22 +138,6 @@ class PostView(ModelView):
 
         return super(PostView, self).on_model_change(form, model, is_created)
 
-
-### Flask Security
-
-class Role(Document, RoleMixin): 
-
-    name = StringField(max_length=100, unique=True)
-    description = StringField(max_length=255)
-
-class User(Document, UserMixin): 
-
-    name = StringField(max_length=100)
-    email = StringField(max_length=255, unique=True)
-    password = StringField(max_length=255)
-    active = BooleanField()
-    roles = ListField(ReferenceField(Role), default=[])
-    meta = {'strict': False}
 
 
 

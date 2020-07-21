@@ -1,16 +1,18 @@
 from math import ceil
 
+from werkzeug.local import LocalProxy
 from flask import Blueprint, render_template, request, \
-                    redirect, url_for
+                    redirect, url_for, session
 from flask_security import login_required
 
 from mongoengine.queryset.visitor import Q
 
-from database import Post 
+from database import Post, User
 from .forms import PostForm
 
 
 posts = Blueprint('posts', __name__, template_folder='templates')
+
 
 # TODO userfriendly behavior in case if smth goes wrong
 # http://localhost/blog/create
@@ -20,11 +22,12 @@ def create_post():
     if request.method == 'POST':
         title = request.form.get('title')
         body = request.form.get('body')
+        user = User.objects(id=session.get('_user_id')).first()
 
         try:
-            Post(title=title, body=body).save()
-        except:
-            print("Something went wrong")
+            Post(title=title, body=body, user=user).save()
+        except Exception as e:
+            print(f"Something went wrong: {e}")
         
         return redirect(url_for('posts.index'))
 
@@ -34,6 +37,7 @@ def create_post():
 
 
 # TODO Make some page for the case when update went wrong
+# TODO Access only to the user's posts
 
 @posts.route('/edit/<slug>', methods=['POST', 'GET'])
 @login_required
@@ -54,7 +58,8 @@ def edit_post(slug):
 
         form = PostForm(obj=post)
         return render_template('posts/edit_post.html', post=post, form=form)
-    except:
+    except Exception as e:
+        print(f'>>> {e}')
         return render_template('404.html'), 404
 
 
@@ -75,9 +80,11 @@ def index():
 
     if q: 
         posts = Post.objects(Q(title__icontains=q) | 
-                             Q(body__icontains=q)).order_by('date').skip(skip).limit(posts_per_page)
+                             Q(body__icontains=q)).order_by('-date').skip(skip).limit(posts_per_page)
     else: 
-        posts = Post.objects.order_by('date').skip(skip).limit(posts_per_page)
+        posts = Post.objects.order_by('-date').skip(skip).limit(posts_per_page)
+        # print(type(current_user))
+        print(session.get('_user_id'))
 
     return render_template('posts/index.html', posts=posts, page=page, totalPages=total_pages)
 
