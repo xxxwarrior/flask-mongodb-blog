@@ -7,7 +7,8 @@ from flask_session import Session
 from flask_security import Security, MongoEngineUserDatastore, current_user
 from flask_mongoengine import MongoEngine 
 
-from database import PostView, Post, User, Role
+from database import Post, User, Role
+from model_views import PostView
 
 app = Flask(__name__, static_folder=r"C:\Development\projects\blog\app\static\css") 
 app.config.from_object(Config)

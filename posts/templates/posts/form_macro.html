@@ -1,10 +1,14 @@
-{% macro form_macro(form, action, btn_name) -%}
+{% macro form_macro(form, action, btn_name, tags="") -%}
     <div class='col-md-6'>
         <form action="{{ action }}" method="POST">
             {% for field in form  %}
                 <div class="form-group">
                     {{ field.label(class='control-label') }}
-                    {{ field(class='form-control') }}
+                    {% if field.name == 'tags' %} 
+                        <input name="tags" type="text" data-role="tagsinput" value="{{ tags }}">
+                    {% else %}
+                        {{ field(class='form-control') }}
+                    {% endif %}
                 </div>
             {% endfor %}
             <button type="submit" class="btn btn-primary"> {{ btn_name }} </button>

@@ -10,5 +10,6 @@
 
 {% block content %}
     {% from 'posts/form_macro.html' import form_macro %}
-    {{ form_macro(form, action=url_for('posts.edit_post', slug=post.slug), btn_name='Update') }}
+    {{ form_macro(form, action=url_for('posts.edit_post', slug=post.slug), btn_name='Update', tags=tags) }}
+
 {% endblock %}

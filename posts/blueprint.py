@@ -7,7 +7,7 @@ from flask_security import login_required
 
 from mongoengine.queryset.visitor import Q
 
-from database import Post, User
+from database import Post, User, Tag, slugify
 from .forms import PostForm
 
 
@@ -39,6 +39,7 @@ def create_post():
 # TODO Make some page for the case when update went wrong
 # TODO Access only to the user's posts
 
+
 @posts.route('/edit/<slug>', methods=['POST', 'GET'])
 @login_required
 def edit_post(slug):
@@ -48,16 +49,28 @@ def edit_post(slug):
         if request.method == 'POST':
             title = request.form.get('title')
             body = request.form.get('body')
+            tags_str = request.form.get('tags')
 
             try:
-                post.update(title=title, body=body)
-            except:
-                print("Something went wrong")
-
+                post.update(title=title, slug=slugify(title), body=body)
+                if tags_str:
+                    tags = [Tag(name=tag.strip()) for tag in tags_str.split(',')]
+                    new_tags = []
+                    for tag in tags: 
+                        if tag not in new_tags:
+                            new_tags.append(tag)
+                    post.tags = new_tags
+                    post.save()
+            except Exception as e:
+                print(f"Something went wrong: {e}")
             return redirect(url_for('posts.index'))
 
+        if post.tags:
+            tags = ', '.join([tag.name for tag in post.tags])
+        else: tags=""
         form = PostForm(obj=post)
-        return render_template('posts/edit_post.html', post=post, form=form)
+        return render_template('posts/edit_post.html', post=post, tags=tags, form=form)
+
     except Exception as e:
         print(f'>>> {e}')
         return render_template('404.html'), 404
@@ -83,8 +96,6 @@ def index():
                              Q(body__icontains=q)).order_by('-date').skip(skip).limit(posts_per_page)
     else: 
         posts = Post.objects.order_by('-date').skip(skip).limit(posts_per_page)
-        # print(type(current_user))
-        print(session.get('_user_id'))
 
     return render_template('posts/index.html', posts=posts, page=page, totalPages=total_pages)
 
@@ -104,7 +115,10 @@ def post_detail(slug):
 def tag_detail(slug):
     try: 
         posts = Post.objects(tags__match={'slug': slug})
+        print(posts[0].tags.get(slug=slug))
         tag = posts[0].tags.get(slug=slug)
+    
         return render_template('posts/tag_detail.html', tag=tag, posts=posts)
-    except:
+    except Exception as e:
+        print(f">>>{e}")
         return render_template('404.html'), 404
