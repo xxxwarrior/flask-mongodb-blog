@@ -14,6 +14,15 @@ from .forms import PostForm
 posts = Blueprint('posts', __name__, template_folder='templates')
 
 
+def make_tags(tags_str: str) -> list:
+    tags = [Tag(name=tag.strip()) for tag in tags_str.split(',')]
+    new_tags = []
+    for tag in tags: 
+        if tag not in new_tags:
+            new_tags.append(tag)
+    return new_tags
+
+
 # TODO userfriendly behavior in case if smth goes wrong
 # http://localhost/blog/create
 @posts.route('/create', methods=['POST', 'GET'])
@@ -22,10 +31,14 @@ def create_post():
     if request.method == 'POST':
         title = request.form.get('title')
         body = request.form.get('body')
+        tags = request.form.get('tags')
         user = User.objects(id=session.get('_user_id')).first()
 
         try:
-            Post(title=title, body=body, user=user).save()
+            post = Post(title=title, body=body, user=user)
+            if tags:
+                    post.tags = make_tags(tags)
+                    post.save()
         except Exception as e:
             print(f"Something went wrong: {e}")
         
@@ -49,17 +62,12 @@ def edit_post(slug):
         if request.method == 'POST':
             title = request.form.get('title')
             body = request.form.get('body')
-            tags_str = request.form.get('tags')
+            tags = request.form.get('tags')
 
             try:
                 post.update(title=title, slug=slugify(title), body=body)
-                if tags_str:
-                    tags = [Tag(name=tag.strip()) for tag in tags_str.split(',')]
-                    new_tags = []
-                    for tag in tags: 
-                        if tag not in new_tags:
-                            new_tags.append(tag)
-                    post.tags = new_tags
+                if tags:
+                    post.tags = make_tags(tags)
                     post.save()
             except Exception as e:
                 print(f"Something went wrong: {e}")
