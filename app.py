@@ -10,7 +10,7 @@ from flask_mongoengine import MongoEngine
 from database import Post, User, Role
 from model_views import PostView
 
-app = Flask(__name__, static_folder=r"C:\Development\projects\blog\app\static\css") 
+app = Flask(__name__, static_folder=r"C:\Development\projects\blog\app\static") 
 app.config.from_object(Config)
 Session(app)
 app.secret_key = Config.SECRET_KEY
