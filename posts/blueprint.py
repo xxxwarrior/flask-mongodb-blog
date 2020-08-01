@@ -4,6 +4,7 @@ from werkzeug.local import LocalProxy
 from flask import Blueprint, render_template, request, \
                     redirect, url_for, session, flash
 from flask_security import login_required
+from flask_login import current_user
 
 from mongoengine.queryset.visitor import Q
 from mongoengine import ValidationError
@@ -34,7 +35,7 @@ def create_post():
         title = request.form.get('title')
         body = request.form.get('body')
         tags = request.form.get('tags')
-        user = User.objects(id=session.get('_user_id')).first()
+        user = User.objects(id=current_user.get_id()).first()
         try:
             post = Post(title=title, body=body, user=user)
             if tags:
@@ -51,15 +52,15 @@ def create_post():
     return render_template('posts/create_post.html', form=form)
 
 
-
 # TODO Access only to the user's posts
+# it's better to do it in post detail and just not to display edit button
+
 @posts.route('/edit/<slug>', methods=['POST', 'GET'])
 @login_required
 def edit_post(slug):
     try: 
         post = Post.objects(slug=slug).first()
         form = PostForm(obj=post)
-        
         
         if request.method == 'POST':
             title = request.form.get('title')
@@ -112,6 +113,8 @@ def index():
     else: 
         posts = Post.objects.order_by('-date').skip(skip).limit(posts_per_page)
 
+    print(current_user.get_id())
+
     return render_template('posts/index.html', posts=posts, page=page, totalPages=total_pages)
 
 
@@ -121,7 +124,13 @@ def post_detail(slug):
     try: 
         post = Post.objects(slug=slug).first()
         tags = post.tags
-        return render_template('posts/post_detail.html', post=post, tags=tags)
+        try: 
+            user = post.user.fetch()
+            user_id = str(user.id)
+        except AttributeError:
+            user_id = None
+
+        return render_template('posts/post_detail.html', post=post, tags=tags, author_id=user_id)
     except:
         return render_template('404.html'), 404
 

@@ -6,10 +6,13 @@
 
 {% block content_title %}
     {{ post.title }}
-    <a  href=" {{url_for('posts.edit_post', slug=post.slug) }} ">
-    <button type="button" class="btn btn-outline-secondary btn-sm">Edit Post</button>
-    </a>
+    {% if author_id == current_user.get_id() or current_user.has_role('admin') %}
+        <a  href=" {{url_for('posts.edit_post', slug=post.slug) }} ">
+        <button type="button" class="btn btn-outline-secondary btn-sm">Edit Post</button>
+        </a>
+    {% endif %}
 {% endblock %}
+
 
 {% block content %}
     <div class='main-content'>

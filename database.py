@@ -50,7 +50,6 @@ class User(Document, UserMixin):
 
 ### Posts Management ###
 
-
 # TODO make better handling of slugs, their duplicate and after edition behavior
 
 def slugify(s):
@@ -68,11 +67,7 @@ class Tag(EmbeddedDocument):
         if self.name:
             self.slug = slugify(self.name)
 
-    # def __repr__(self):
-    #     return f'"{self.name}" tag'
 
-
-# TODO user and userinfo
 class Post(Document):
 
     date = DateTimeField(default=datetime.now())
@@ -91,5 +86,3 @@ class Post(Document):
     def generate_slug(self):
         if self.title:
             self.slug = slugify(self.title)
-
- 
