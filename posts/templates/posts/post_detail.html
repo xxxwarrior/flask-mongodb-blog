@@ -8,7 +8,7 @@
     {{ post.title }}
     {% if author_id == current_user.get_id() or current_user.has_role('admin') %}
         <a  href=" {{url_for('posts.edit_post', slug=post.slug) }} ">
-        <button type="button" class="btn btn-outline-secondary btn-sm">Edit Post</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm">Edit Post</button>
         </a>
     {% endif %}
 {% endblock %}
@@ -18,6 +18,10 @@
     <div class='main-content'>
         {{ post.body }}
     </div>
+    <br>
+    {% if picture %}
+        <img src="{{ url_for('posts.uploaded_file', filename=picture) }}" alt="test">
+    {% endif %}
     <br>
     {% if tags %}
         <div class='tags'>

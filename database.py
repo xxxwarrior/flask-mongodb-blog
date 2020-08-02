@@ -8,7 +8,8 @@ from flask_security import UserMixin, RoleMixin
 from mongoengine import connect, Document, IntField, \
                         StringField, BooleanField, ReferenceField, \
                         ListField, DateTimeField, LazyReferenceField, \
-                        EmbeddedDocument, EmbeddedDocumentListField
+                        EmbeddedDocument, EmbeddedDocumentListField, \
+                        FileField
                         
 
 from config import Config
@@ -76,6 +77,8 @@ class Post(Document):
     body = StringField()
     tags = EmbeddedDocumentListField(Tag, default=[])
     user = LazyReferenceField(User, default=None, reverse_delete_rule=1)
+    picture = FileField()
+    pic_name = StringField()
     meta = {'collection': 'posts',
             'db_alias': 'posts-db'}
 

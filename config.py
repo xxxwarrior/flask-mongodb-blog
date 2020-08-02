@@ -8,6 +8,7 @@ class Config(object):
     SECRET_KEY = "Super secret key"
     MONGODB_HOST = DB_URI
     MONGODB_DB = True
+    UPLOAD_FOLDER = r"C:\Development\projects\blog\app\static\upload"
 
     # Flask Security
     SECURITY_PASSWORD_SALT = 'salt'

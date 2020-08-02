@@ -1,11 +1,13 @@
 {% macro form_macro(form, action, btn_name, tags="") -%}
     <div class='col-md-6'>
-        <form action="{{ action }}" method="POST">
+        <form action="{{ action }}" method="POST" enctype="multipart/form-data">
             {% for field in form  %}
                 <div class="form-group">
                     {{ field.label(class='control-label') }}
                     {% if field.name == 'tags' %} 
                         <input name="tags" type="text" data-role="tagsinput" value="{{ tags }}">
+                    {% elif field.name == 'picture' %}
+                        <input type="file" name="file">
                     {% else %}
                         {{ field(class='form-control') }}
                     {% endif %}
