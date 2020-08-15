@@ -1,6 +1,6 @@
-from wtforms import Form, Field, StringField, TextAreaField
+from wtforms import Form, Field, StringField, \
+                    TextAreaField, PasswordField, validators
 from wtforms.widgets import TextInput
-from flask_wtf import FlaskForm
 from flask_wtf.file import FileField
 
 from database import Tag
@@ -28,3 +28,15 @@ class PostForm(Form):
     body = TextAreaField('Body')
     tags = TagListField('Tags')
     picture = FileField('Picture')
+
+
+class LoginForm(Form):
+    email = StringField('Email Address')
+    password = PasswordField('Password')
+
+class RegisterForm(Form):
+    name = StringField('Your name')
+    email = StringField('Email Address')
+    password = PasswordField('Password')
+    
+
