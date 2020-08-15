@@ -38,6 +38,8 @@
           <li class="nav-item"></li>
             {% if current_user.has_role('admin') %}
               <a class="nav-link" href='/admin'>Admin</a>
+            {% elif current_user.is_authenticated == False %} 
+              <a class="nav-link" href='/login'>Login</a>
             {% endif %}
           </li>
         </ul>
