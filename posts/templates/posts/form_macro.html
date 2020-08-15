@@ -1,5 +1,5 @@
 {% macro form_macro(form, action, btn_name, tags="") -%}
-    <div class='col-md-6'>
+    <div class='col-md-6 container justify-content-center'>
         <form action="{{ action }}" method="POST" enctype="multipart/form-data">
             {% for field in form  %}
                 <div class="form-group">
@@ -13,7 +13,9 @@
                     {% endif %}
                 </div>
             {% endfor %}
-            <button type="submit" class="btn btn-primary"> {{ btn_name }} </button>
+            <div class="col text-center">
+                <button type="submit" class="btn btn-info btn-lg"> {{ btn_name }} </button>
+            </div>
         </form>
     </div>
 {%- endmacro %}
