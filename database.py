@@ -14,11 +14,6 @@ from mongoengine import connect, Document, IntField, \
 
 from config import Config
 
-connect(
-    db='testposts',
-    alias='posts-db',
-    host=Config.DB_URI
-)
 
 connect(
     db='test',
@@ -48,10 +43,15 @@ class User(Document, UserMixin):
     meta = {'strict': False}
     # would be cool to store user's posts also
 
+    def is_active(self):
+        return True
+=
+
+
 
 ### Posts Management ###
 
-# TODO make better handling of slugs, their duplicate and after edition behavior
+# TODO make better handling of slugs' duplicates
 
 def slugify(s):
     pattern = r'[\W+]'
@@ -79,8 +79,7 @@ class Post(Document):
     user = LazyReferenceField(User, default=None, reverse_delete_rule=1)
     picture = FileField()
     pic_name = StringField()
-    meta = {'collection': 'posts',
-            'db_alias': 'posts-db'}
+    meta = {'collection': 'posts'}
 
     def __init__(self, *args, **kwargs):
         super(Post, self).__init__(*args, **kwargs)
