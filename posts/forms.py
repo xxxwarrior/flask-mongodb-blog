@@ -2,6 +2,7 @@ from wtforms import Form, Field, StringField, \
                     TextAreaField, PasswordField, validators
 from wtforms.widgets import TextInput
 from flask_wtf.file import FileField
+from flask_wtf import FlaskForm
 
 from database import Tag
 
@@ -30,7 +31,7 @@ class PostForm(Form):
     picture = FileField('Picture')
 
 
-class LoginForm(Form):
+class LoginForm(FlaskForm):
     email = StringField('Email Address')
     password = PasswordField('Password')
 
