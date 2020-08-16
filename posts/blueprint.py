@@ -1,21 +1,20 @@
 from math import ceil
 import os
 
-from werkzeug.local import LocalProxy
 from werkzeug.utils import secure_filename
 from flask import Blueprint, render_template, request, \
                   redirect, url_for, session, flash, \
                   send_from_directory
                     
-from flask_security import login_required
-from flask_login import current_user
-
+from flask_security import login_required, logout_user
+from flask_login import current_user, login_user
 from mongoengine.queryset.visitor import Q
 from mongoengine import ValidationError
+from mongoengine.errors import NotUniqueError
 
 from database import Post, User, Tag, slugify
-from .forms import PostForm
-from app import app
+from .forms import PostForm, LoginForm, RegisterForm
+from app import app, bcrypt, security, login_manager, client
 
 
 posts = Blueprint('posts', __name__, template_folder='templates')
@@ -33,6 +32,57 @@ def make_tags(tags_str: str) -> list:
 def allowed_file(filename):
     allowed_ext = {'png', 'jpeg', 'jpg', 'gif'}
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_ext
+
+
+
+
+@posts.route('/login', methods=['POST', 'GET'])
+def login():
+    form = LoginForm()
+    if request.method == 'POST':
+        if form.validate_on_submit:  
+            user = User.objects(email=form.email.data).first()
+            if user:
+                if bcrypt.check_password_hash(user.password, form.password.data):
+                    current_user = user
+                    login_user(user)
+                    session['user'] = user
+                    flash("You logged in succesfully")
+        return redirect(url_for('posts.index'))
+        
+    return render_template('security/login_user.html', form=form)
+    
+
+
+@posts.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST': 
+        try:
+            name = request.form.get('name')
+            email = request.form.get('email')
+            password = request.form.get('password')
+            pw_hash = bcrypt.generate_password_hash(password)
+            usr = User(name=name, email=email, password=pw_hash)
+            usr.save()
+            flash("Your registration was succesfull")
+            return redirect('/login')
+        except NotUniqueError:
+            flash("This email is already registered", "error")
+        except Exception as e:
+            print(e)
+            print(type(e))
+    form = RegisterForm()
+    return render_template('security/register_user.html', form=form)
+
+
+
+@posts.route('/logout')
+def logout():
+    user = current_user
+    user.authenticated = False
+    logout_user()
+    flash("You are not logged in now")
+    return redirect(url_for('posts.index'))
 
 
 
@@ -142,6 +192,7 @@ def index():
         posts = Post.objects.order_by('-date').skip(skip).limit(posts_per_page)
 
     print(current_user.get_id())
+    print(current_user.is_authenticated)
 
     return render_template('posts/index.html', posts=posts, page=page, totalPages=total_pages)
 
@@ -151,22 +202,27 @@ def uploaded_file(filename):
     return send_from_directory(file_path, filename)
 
 
-
-
 # http://localhost/blog/first-post
 @posts.route('/<slug>')
 def post_detail(slug):
     try: 
         post = Post.objects(slug=slug).first()
         tags = post.tags
+        
         if post.picture and post.pic_name:
             filename = post.pic_name
-            print(filename)
+        else: filename = None
         try: 
             user = post.user.fetch()
             user_id = str(user.id)
         except AttributeError:
             user_id = None
+
+        print('>>', current_user)        
+        print(current_user.is_authenticated)
+        print('role', current_user.has_role('admin'))
+        print(current_user.roles)
+
 
         return render_template('posts/post_detail.html', post=post, tags=tags, picture=filename, author_id=user_id)
     except:
