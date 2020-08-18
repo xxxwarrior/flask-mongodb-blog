@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Login
+{% endblock %}
+ 
+{% block content_title %}
+  <h1 class='text-center'>{{ ('Login') }}</h1>
+{% endblock %}
+
+{% block content %}
+
+  <div class='col-md-6 container justify-content-center'>
+    {% from "authorization/_macros.html" import render_field_with_errors, render_field %}
+    {% include "authorization/_messages.html" %}
+    <form action="{{ url_for('authorization.login') }}" method="POST" name="login_user_form">
+      {{ login_user_form.hidden_tag() }}
+      {{ render_field_with_errors(login_user_form.email, class='form-control') }}
+      {{ render_field_with_errors(login_user_form.password, class='form-control') }}
+      {{ render_field_with_errors(login_user_form.remember) }}
+      <div class="col text-center">
+        <button type="submit" class="btn btn-info btn-lg"> Login </button>
+      </div>
+    </form>
+    <i>Not registered yet?</i>
+      <a href="{{ url_for('authorization.register') }}">
+        <button type='button' class='btn btn-outline-dark btn-sm'>Register</button> 
+      </a>    
+  </div>
+
+{% endblock %}
+
+
