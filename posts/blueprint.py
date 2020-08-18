@@ -5,75 +5,19 @@ from werkzeug.utils import secure_filename
 from flask import Blueprint, render_template, request, \
                   redirect, url_for, session, flash, \
                   send_from_directory
-from flask_security import login_required, logout_user
-from flask_login import current_user, login_user
-
+from flask_login import current_user, login_required
 from mongoengine import ValidationError
-from mongoengine.errors import NotUniqueError
 from mongoengine.queryset.visitor import Q
 
 from database import Post, User, Tag, slugify
-from .forms import PostForm, LoginForm, RegisterForm
-from app import app, bcrypt, security, login_manager, client
+from .forms import PostForm
+from app import app
 
 
 posts = Blueprint('posts', __name__, template_folder='templates')
-authorization = Blueprint('authorization', __name__)
+
 
 file_path = app.config['UPLOAD_FOLDER'] + r'\\' 
-
-
-
-
-###--- Authorization views ---###
-
-@authorization.route('/login', methods=['POST', 'GET'])
-def login():
-    form = LoginForm()
-    if request.method == 'POST':
-        if form.validate_on_submit:  
-            user = User.objects(email=form.email.data).first()
-            if user:
-                if bcrypt.check_password_hash(user.password, form.password.data):
-                    current_user = user
-                    login_user(user)
-                    session['user'] = user
-                    flash("You logged in succesfully")
-        return redirect(url_for('posts.index'))
-        
-    return render_template('security/login_user.html', form=form)
-    
-
-@authorization.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST': 
-        try:
-            name = request.form.get('name')
-            email = request.form.get('email')
-            password = request.form.get('password')
-            pw_hash = bcrypt.generate_password_hash(password)
-            usr = User(name=name, email=email, password=pw_hash)
-            usr.save()
-            flash("Your registration was succesfull")
-            return redirect('/login')
-        except NotUniqueError:
-            flash("This email is already registered", "error")
-        except Exception as e:
-            print(e)
-            print(type(e))
-    form = RegisterForm()
-    return render_template('security/register_user.html', form=form)
-
-
-@authorization.route('/logout')
-def logout():
-    user = current_user
-    user.authenticated = False
-    logout_user()
-    flash("You are not logged in now")
-    return redirect(url_for('posts.index'))
-
-
 
 
 
@@ -181,6 +125,7 @@ def edit_post(slug):
 def index():
     q = request.args.get('q')
     page = request.args.get('page')
+
 
     if page and page.isdigit():
         page = int(page)

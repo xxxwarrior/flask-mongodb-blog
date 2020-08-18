@@ -23,7 +23,7 @@
             </li>
 
             <li class="nav-item">
-                {% if current_user.has_role('admin') %}
+                {% if current_user.is_authenticated == True and current_user.has_role('admin') %}
                   <a class="nav-link" href="{{ url_for('posts.create_post') }}">+New Post</a>
                 {% endif %}
             </li>
@@ -36,10 +36,10 @@
         
         <ul class="navbar-nav mr-auto"> 
           <li class="nav-item"></li>
-            {% if current_user.has_role('admin') %}
-              <a class="nav-link" href='/admin'>Admin</a>
-            {% elif current_user.is_authenticated == False %} 
+            {% if current_user.is_authenticated == False %} 
               <a class="nav-link" href='/login'>Login</a>
+            {% elif current_user.has_role('admin') %}
+              <a class="nav-link" href='/admin'>Admin</a>
             {% endif %}
           </li>
         </ul>
