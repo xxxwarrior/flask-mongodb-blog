@@ -126,29 +126,39 @@ def index():
     q = request.args.get('q')
     page = request.args.get('page')
 
+    print(current_user.is_authenticated)
+
 
     if page and page.isdigit():
         page = int(page)
     else: page = 1
 
-    total_posts = Post.objects.count()
-    posts_per_page = 5
-    total_pages = ceil(total_posts / posts_per_page)
+    posts_count = Post.objects.count()
+    rows_per_page = 3
+    posts_per_row = 4
+    posts_per_page = rows_per_page * posts_per_row
+    total_pages = ceil(posts_count / posts_per_page)
     skip = (page-1) * posts_per_page
+    print('skip', skip)
+    print('total pages', total_pages)
 
     if q: 
         posts = Post.objects(Q(title__icontains=q) | 
                              Q(body__icontains=q)).order_by('-date').skip(skip).limit(posts_per_page)
     else: 
         posts = Post.objects.order_by('-date').skip(skip).limit(posts_per_page)
+        posts = [post for post in posts]
+        # posts = Post.objects.order_by('-date')
+            
 
-    return render_template('posts/index.html', posts=posts, page=page, totalPages=total_pages)
+    return render_template('posts/index.html', posts=posts, rows_per_page=rows_per_page, posts_per_row=posts_per_row, page=page, totalPages=total_pages)
 
 
 @posts.route('/uploads/<filename>')
 def uploaded_file(filename):
-    """ Downloads a file from a static directory """
-
+    """ Downloads a file from a static directory """ 
+    #-- This function is called by html template to display post picture --#
+    print('>>>>>>>>>>>>>>>>>>>>>>')
     return send_from_directory(file_path, filename)
 
 
@@ -159,15 +169,22 @@ def post_detail(slug):
     try: 
         post = Post.objects(slug=slug).first()
         tags = post.tags
+        print('>>> post_detail')
         
         if post.picture and post.pic_name:
             filename = post.pic_name
+            print('>>filename', filename)
         else: filename = None
         try: 
             user = post.user.fetch()
             user_id = str(user.id)
+            print("USER ID SUCCESS", user_id)
         except AttributeError:
             user_id = None
+            print("USER ID FAIL", user_id)
+        
+        print("USER ID BEFORE RENDER", user_id)
+        print(f'post {post}, tags {tags}, pic {filename}')
 
         return render_template('posts/post_detail.html', post=post, tags=tags, picture=filename, author_id=user_id)
     except:
