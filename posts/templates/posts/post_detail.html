@@ -17,13 +17,12 @@
 
 {% block content %}
   <div class='main-content'>
-    {{ post.body }}
+    <p>{{ post.body }} </p>
   </div>
   <br>
   {% if picture %}
-    picture {{picture}}
     <div class="image">
-      <img class="object-fit_contain" src="{{ url_for('posts.uploaded_file', filename=picture) }}" alt="test" style="width:500px;height:500px;">
+      <img class="img-thumbnail post-img" src="{{ url_for('posts.uploaded_file', filename=picture) }}" alt="test">
     </div>
   {% endif %}
     <br>
