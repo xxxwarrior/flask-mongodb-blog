@@ -56,6 +56,12 @@ def slugify(s):
     pattern = r'[\W+]'
     return re.sub(pattern, '-', s).lower()
 
+class Comment(EmbeddedDocument):
+
+    date = DateTimeField(default=datetime.now().isoformat(sep=' ', timespec='minutes'))
+    author = ReferenceField(User, required=True)
+    body = StringField(max_length=1000)
+
 
 class Tag(EmbeddedDocument):
 
@@ -70,7 +76,7 @@ class Tag(EmbeddedDocument):
 
 class Post(Document):
 
-    date = DateTimeField(default=datetime.now())
+    date = DateTimeField(default=datetime.now().isoformat(sep=' ', timespec='minutes'))
     title = StringField(max_length=140)
     slug = StringField(max_length=140, unique=True)
     body = StringField()
@@ -78,6 +84,7 @@ class Post(Document):
     user = LazyReferenceField(User, default=None, reverse_delete_rule=1)
     picture = FileField()
     pic_name = StringField()
+    comments = EmbeddedDocumentListField(Comment, default=[])
     meta = {'collection': 'posts'}
 
     def __init__(self, *args, **kwargs):
