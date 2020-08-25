@@ -1,23 +1,42 @@
-.navbar {
-    border-radius: 0;
-}
-
 h1 {
     color: #ff0075;
+    text-align: start;
 }
-
 a {
-    color: #05508c 
+    color: #05508c;
 }
 body {
     padding-block-end: 50px;
     /* padding-bottom: 50px; */
 }
-
 a.nav-link {
     color: #3200ca8a
 }
 
+.navbar {
+    border-radius: 0;
+}
+
+
+.pink-text {
+    color: #ff0075;
+}
+.info-text {
+    color: #17a2b8;
+}
+
+.small-date {
+    font-size: 80%;
+    color: #55595d;
+}
+
+.image {
+    text-align: center;
+}
 .post-img {
     width: 44%;
+    align-self: center;
+}
+.padding-25 {
+    padding: 25px;
 }
