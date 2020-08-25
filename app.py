@@ -20,6 +20,9 @@ app.config.from_object(Config)
 app.static_folder = app.root_path + r"\static"
 app.secret_key = Config.SECRET_KEY
 
+# print(app.__dir__())
+# print(app.__dict__)
+
 session = Session()
 session.init_app(app)
 
