@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 
 {% block title %}
-    Posts
+  Posts
 {% endblock %}
 
 {% block content_title %}
-    Posts
+  Posts
 {% endblock %}
 
 {% block content %}
@@ -20,7 +20,7 @@
           <a href="{{ url_for('posts.post_detail', slug=post.slug)}}" class="list-group-item list-group-item-action flex-column align-items-center border border-primary" style="display: flex; flex-direction: column"> 
             <span class="text-primary">{{ post.title }}</span>
             {% if post.pic_name %}
-              <img class="object-fit_contain" src="{{ url_for('posts.uploaded_file', filename=post.pic_name) }}" style="width:100px;height:100px;">
+              <img class="img-thumbnail" src="{{ url_for('posts.uploaded_file', filename=post.pic_name) }}" style="width:100px;">
             {% endif %}
           </a> 
         </li>
