@@ -9,8 +9,8 @@ from flask_login import current_user, login_required
 from mongoengine import ValidationError
 from mongoengine.queryset.visitor import Q
 
-from database import Post, User, Tag, slugify
-from .forms import PostForm
+from database import Post, User, Tag, Comment, slugify
+from .forms import PostForm, CommentForm
 from app import app
 
 
@@ -164,30 +164,37 @@ def uploaded_file(filename):
 
 #- Post view -#
 # http://localhost/blog/first-post
-@posts.route('/<slug>')
+@posts.route('/<slug>', methods=['POST', 'GET'])
 def post_detail(slug):
+
     try: 
         post = Post.objects(slug=slug).first()
         tags = post.tags
-        print('>>> post_detail')
-        
+    
         if post.picture and post.pic_name:
             filename = post.pic_name
-            print('>>filename', filename)
         else: filename = None
         try: 
             user = post.user.fetch()
             user_id = str(user.id)
-            print("USER ID SUCCESS", user_id)
         except AttributeError:
             user_id = None
-            print("USER ID FAIL", user_id)
-        
-        print("USER ID BEFORE RENDER", user_id)
-        print(f'post {post}, tags {tags}, pic {filename}')
 
-        return render_template('posts/post_detail.html', post=post, tags=tags, picture=filename, author_id=user_id)
-    except:
+        form = CommentForm()
+        if current_user.is_authenticated:
+            comment_author = User.objects(id=current_user.get_id()).first()
+        else: comment_author = None
+        if request.method == 'POST':
+            comment = request.form.get('comment')
+            if form.validate_on_submit: 
+                comment = Comment(body=comment, author=comment_author)
+                post.comments.append(comment)
+                post.save()
+
+        return render_template('posts/post_detail.html', post=post, tags=tags, picture=filename, post_author=user_id, \
+                                                        form=form, comments=post.comments[::-1], comment_author=comment_author)
+    except Exception as e:
+        print(f'fail happend: {e}, {type(e)}')
         return render_template('404.html'), 404
 
 
