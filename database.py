@@ -9,7 +9,7 @@ from mongoengine import connect, Document, IntField, \
                         StringField, BooleanField, ReferenceField, \
                         ListField, DateTimeField, LazyReferenceField, \
                         EmbeddedDocument, EmbeddedDocumentListField, \
-                        FileField, BinaryField
+                        FileField, BinaryField, ObjectIdField
                         
 
 from config import Config
@@ -18,7 +18,7 @@ from config import Config
 connect(
     db='test',
     alias='default',
-    host=Config.DB_URI
+    host=Config.MONGODB_HOST
 )
 
 # client = MongoClient(Config.DB_URI)
@@ -58,6 +58,7 @@ def slugify(s):
 
 class Comment(EmbeddedDocument):
 
+    oid = ObjectIdField(default=ObjectId(), required=True, primary_key=True)
     date = DateTimeField(default=datetime.now().isoformat(sep=' ', timespec='minutes'))
     author = ReferenceField(User, required=True)
     body = StringField(max_length=1000)
