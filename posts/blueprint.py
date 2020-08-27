@@ -2,6 +2,7 @@ from math import ceil
 import os
 
 from werkzeug.utils import secure_filename
+from bson.objectid import ObjectId
 from flask import Blueprint, render_template, request, \
                   redirect, url_for, session, flash, \
                   send_from_directory
@@ -16,13 +17,8 @@ from app import app
 
 posts = Blueprint('posts', __name__, template_folder='templates')
 
-
 file_path = app.config['UPLOAD_FOLDER'] + r'\\' 
 
-
-
-
-###--- Posts interaction and projection views ---###
 
 def make_tags(tags_str: str) -> list:
     """ Makes a list of Tag objects from a string """
@@ -34,7 +30,7 @@ def make_tags(tags_str: str) -> list:
             tag_list.append(tag)
     return tag_list
 
-def allowed_file(filename):
+def is_allowed_file(filename):
     allowed_ext = {'png', 'jpeg', 'jpg', 'gif'}
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_ext
 
@@ -87,7 +83,7 @@ def edit_post(slug):
                 if tags:
                     post.tags = make_tags(tags)
                 if file:
-                    if not allowed_file(filename):
+                    if not is_allowed_file(filename):
                         flash("The file format is not supported", "error")
                     elif filename == '':
                         flash("No selected file", "error")
@@ -99,7 +95,7 @@ def edit_post(slug):
                         post.picture.put(f, content_type='image/jpeg')
                 post.save() 
             except ValidationError:
-                flash("The title is too long, please try again", "error")
+                flash("An error occured. The title might too long, please try again", "error")
                 return render_template('posts/edit_post.html', post=post, tags=tags, form=form)
             except Exception as e:
                 flash("An error occured, please try again", "error")
@@ -107,7 +103,7 @@ def edit_post(slug):
                 return render_template('posts/edit_post.html', post=post, tags=tags, form=form)
 
             flash("You've edited your post successfully", "message")
-            return redirect(url_for('posts.index'))
+            return redirect(url_for('posts.post_detail', slug=post.slug))
 
         if post.tags:
             tags = ', '.join([tag.name for tag in post.tags])
@@ -127,8 +123,6 @@ def index():
     page = request.args.get('page')
 
     print(current_user.is_authenticated)
-
-
     if page and page.isdigit():
         page = int(page)
     else: page = 1
@@ -150,15 +144,14 @@ def index():
         posts = [post for post in posts]
         # posts = Post.objects.order_by('-date')
             
-
     return render_template('posts/index.html', posts=posts, rows_per_page=rows_per_page, posts_per_row=posts_per_row, page=page, totalPages=total_pages)
 
 
 @posts.route('/uploads/<filename>')
-def uploaded_file(filename):
+def download_file(filename):
     """ Downloads a file from a static directory """ 
     #-- This function is called by html template to display post picture --#
-    print('>>>>>>>>>>>>>>>>>>>>>>')
+
     return send_from_directory(file_path, filename)
 
 
@@ -192,7 +185,7 @@ def post_detail(slug):
                 post.save()
 
         return render_template('posts/post_detail.html', post=post, tags=tags, picture=filename, post_author=user_id, \
-                                                        form=form, comments=post.comments[::-1], comment_author=comment_author)
+                                                        form=form, comment_author=comment_author, comments=post.comments[::-1])
     except Exception as e:
         print(f'fail happend: {e}, {type(e)}')
         return render_template('404.html'), 404
@@ -209,3 +202,21 @@ def tag_detail(slug):
     except Exception as e:
         print(f">>>{e}")
         return render_template('404.html'), 404
+
+
+@posts.route('/<slug>/delete-comment/<comment_id>')
+def delete_comment(slug, comment_id):
+    try:
+        post = Post.objects(slug=slug).first()
+        comment_id = ObjectId(comment_id)
+        post.update(pull__comments__oid=comment_id)
+        post.save()
+    except Exception as e:
+        print('fail happened while trying to delete a comment:')
+        print(f'{type(e)}: {e}')
+        flash('An error occured, please try again later', 'error')
+    return redirect(url_for('posts.post_detail', slug=slug))
+
+
+
+
