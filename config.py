@@ -1,17 +1,26 @@
 from pymongo import MongoClient
 
+from os import environ
+from dotenv import load_dotenv, find_dotenv
+
+load_dotenv(find_dotenv())
+
 class Config(object):
     DEBUG = True
-    DB_URI = "mongodb+srv://Admin:Admin1@cluster0-6fxtf.mongodb.net/test?retryWrites=true&w=majority&ssl=true&ssl_cert_reqs=CERT_NONE"
-    SESSION_TYPE = 'mongodb'
-    SESSION_MONGODB = MongoClient(DB_URI)
-    SECRET_KEY = "Super secret key"
-    MONGODB_HOST = DB_URI
+    TEMLATES_AUTO_RELOAD = True
+ 
     MONGODB_DB = True
-    UPLOAD_FOLDER = r"D:\Development\projects\blog\app\static\upload"
+    MONGODB_HOST = environ.get('DB_URI')
+
+    SECRET_KEY = environ.get('SECRET_KEY')
+    SESSION_TYPE = 'mongodb'
+    SESSION_MONGODB = MongoClient(MONGODB_HOST)
+    
+    STATIC_FOLDER = 'static'
+    UPLOAD_FOLDER = environ.get('UPLOAD_FOLDER')
 
     # Flask Security
-    SECURITY_PASSWORD_SALT = 'salt'
+    SECURITY_PASSWORD_SALT = environ.get('SALT')
     SECURITY_PASSWORD_HASH = 'bcrypt'
  
     

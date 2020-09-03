@@ -9,7 +9,7 @@ from mongoengine import connect, Document, IntField, \
                         StringField, BooleanField, ReferenceField, \
                         ListField, DateTimeField, LazyReferenceField, \
                         EmbeddedDocument, EmbeddedDocumentListField, \
-                        FileField, BinaryField
+                        FileField, BinaryField, ObjectIdField
                         
 
 from config import Config
@@ -18,7 +18,7 @@ from config import Config
 connect(
     db='test',
     alias='default',
-    host=Config.DB_URI
+    host=Config.MONGODB_HOST
 )
 
 # client = MongoClient(Config.DB_URI)
@@ -56,28 +56,35 @@ def slugify(s):
     pattern = r'[\W+]'
     return re.sub(pattern, '-', s).lower()
 
+class Comment(EmbeddedDocument):
+
+    oid = ObjectIdField(default=ObjectId(), required=True, primary_key=True)
+    date = DateTimeField(default=datetime.now().isoformat(sep=' ', timespec='minutes'))
+    author = ReferenceField(User, required=True)
+    body = StringField(max_length=1000)
+
 
 class Tag(EmbeddedDocument):
 
-    name = StringField(max_length=140)
+    name = StringField(max_length=140, required=True)
     slug = StringField(max_length=140)
 
     def __init__(self, *args, **kwargs):
         super(Tag, self).__init__(*args, **kwargs)
-        if self.name:
-            self.slug = slugify(self.name)
+        self.slug = slugify(self.name)
 
 
 class Post(Document):
 
-    date = DateTimeField(default=datetime.now())
-    title = StringField(max_length=140)
+    date = DateTimeField(default=datetime.now().isoformat(sep=' ', timespec='minutes'))
+    title = StringField(max_length=140, required=True, min_length=1, null=False)
     slug = StringField(max_length=140, unique=True)
     body = StringField()
     tags = EmbeddedDocumentListField(Tag, default=[])
     user = LazyReferenceField(User, default=None, reverse_delete_rule=1)
     picture = FileField()
     pic_name = StringField()
+    comments = EmbeddedDocumentListField(Comment, default=[])
     meta = {'collection': 'posts'}
 
     def __init__(self, *args, **kwargs):
@@ -85,5 +92,4 @@ class Post(Document):
         self.generate_slug()
 
     def generate_slug(self):
-        if self.title:
-            self.slug = slugify(self.title)
+        self.slug = slugify(self.title)

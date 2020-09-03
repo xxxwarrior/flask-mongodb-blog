@@ -13,18 +13,13 @@ from app import bcrypt, login_manager
 
 authorization = Blueprint('authorization', __name__, template_folder='templates')
 
-###--- Authorization views ---###
-
 
 @login_manager.user_loader
 def user_loader(user_id):
     user = User.objects(id=user_id).first()
     if user:
-        print("user loader user", user)
         return user
     return
-
-
 
 @authorization.route('/login', methods=['POST', 'GET'])
 def login():

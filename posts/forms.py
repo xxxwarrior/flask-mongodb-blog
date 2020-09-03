@@ -24,9 +24,13 @@ class TagListField(Field):
             for value in valuelist:
                 self.data.append(Tag(name=value)) 
 
-class PostForm(Form):
+class PostForm(FlaskForm):
     title = StringField('Title')
     body = TextAreaField('Body')
     tags = TagListField('Tags')
     picture = FileField('Picture')
+
+class CommentForm(FlaskForm):
+    comment = StringField('Your Comment:')
+
 
