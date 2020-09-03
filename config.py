@@ -1,6 +1,6 @@
 from pymongo import MongoClient
 
-from os import environ, path
+from os import environ
 from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv())

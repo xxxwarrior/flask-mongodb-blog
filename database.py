@@ -66,19 +66,18 @@ class Comment(EmbeddedDocument):
 
 class Tag(EmbeddedDocument):
 
-    name = StringField(max_length=140)
+    name = StringField(max_length=140, required=True)
     slug = StringField(max_length=140)
 
     def __init__(self, *args, **kwargs):
         super(Tag, self).__init__(*args, **kwargs)
-        if self.name:
-            self.slug = slugify(self.name)
+        self.slug = slugify(self.name)
 
 
 class Post(Document):
 
     date = DateTimeField(default=datetime.now().isoformat(sep=' ', timespec='minutes'))
-    title = StringField(max_length=140)
+    title = StringField(max_length=140, required=True, min_length=1, null=False)
     slug = StringField(max_length=140, unique=True)
     body = StringField()
     tags = EmbeddedDocumentListField(Tag, default=[])
@@ -93,5 +92,4 @@ class Post(Document):
         self.generate_slug()
 
     def generate_slug(self):
-        if self.title:
-            self.slug = slugify(self.title)
+        self.slug = slugify(self.title)

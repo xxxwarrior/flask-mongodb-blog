@@ -5,15 +5,17 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
   <link rel="stylesheet" type="text/css" href=" {{ url_for('static', filename='css/style.css') }}"> 
   <link rel="stylesheet" type="text/css" href=" {{ url_for('static', filename='tag_input/tagsinput.css') }}"> 
+  <link rel="icon" type="image/gif" href=" {{ url_for('static', filename='icons/animated_favicon1.gif') }}">
+  <link rel="shortcut icon" href=" {{ url_for('static', filename='icons/favicon.ico') }}">
   <title>
     {% block title %}
     {% endblock %} | Flask app 
   </title>
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <nav class="navbar navbar-expand-lg bg-light">
     <a class="navbar-brand" href=" {{ url_for('index') }} ">
-    <img src ="https://sun9-64.userapi.com/qmmg3WLeqatxCkwvkKYeIARUwekxC-tvoi3uxg/Sku6Jh7QmhE.jpg" type="image/jpg" width="50" height="50" class="img-thumbnail" alt="">
+    <img src =" {{ url_for('static', filename='icons/icon.jpg') }}" type="image/jpg" width="50" height="50" class="img-thumbnail" alt="">
       Home
     </a>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">

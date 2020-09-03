@@ -31,6 +31,6 @@ class PostForm(FlaskForm):
     picture = FileField('Picture')
 
 class CommentForm(FlaskForm):
-    comment = StringField('Comment')
+    comment = StringField('Your Comment:')
 
 

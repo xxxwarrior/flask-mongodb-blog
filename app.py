@@ -17,11 +17,7 @@ from model_views import PostView
 
 app = Flask(__name__) 
 app.config.from_object(Config)
-app.static_folder = app.root_path + r"\static"
-app.secret_key = Config.SECRET_KEY
 
-# print(app.__dir__())
-# print(app.__dict__)
 
 session = Session()
 session.init_app(app)
@@ -29,7 +25,6 @@ session.init_app(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'authorization.login'
-
 
 bcrypt = Bcrypt(app)
 

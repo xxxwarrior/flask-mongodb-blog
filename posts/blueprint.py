@@ -122,7 +122,6 @@ def index():
     q = request.args.get('q')
     page = request.args.get('page')
 
-    print(current_user.is_authenticated)
     if page and page.isdigit():
         page = int(page)
     else: page = 1
@@ -133,16 +132,15 @@ def index():
     posts_per_page = rows_per_page * posts_per_row
     total_pages = ceil(posts_count / posts_per_page)
     skip = (page-1) * posts_per_page
-    print('skip', skip)
-    print('total pages', total_pages)
 
     if q: 
         posts = Post.objects(Q(title__icontains=q) | 
                              Q(body__icontains=q)).order_by('-date').skip(skip).limit(posts_per_page)
     else: 
         posts = Post.objects.order_by('-date').skip(skip).limit(posts_per_page)
+        # when passed to a template, posts queryset contains not just needed objects but all of them
+        # that is why it's nessesary to make a deep copy of the expected slice:
         posts = [post for post in posts]
-        # posts = Post.objects.order_by('-date')
             
     return render_template('posts/index.html', posts=posts, rows_per_page=rows_per_page, posts_per_row=posts_per_row, page=page, totalPages=total_pages)
 
