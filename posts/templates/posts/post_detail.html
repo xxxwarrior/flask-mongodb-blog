@@ -5,31 +5,37 @@
 {% endblock %}
 
 {% block content_title %}
-    {{ post.title }}
-    {% if author_id == current_user.get_id() or current_user.has_role('admin') %}
+  {{ post.title }}
+    {% if current_user.is_authenticated %}
+      {% if author_id == current_user.get_id() or current_user.has_role('admin') %}
         <a  href=" {{url_for('posts.edit_post', slug=post.slug) }} ">
-            <button type="button" class="btn btn-outline-secondary btn-sm">Edit Post</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm">Edit Post</button>
         </a>
+      {% endif %}   
     {% endif %}
 {% endblock %}
 
-
 {% block content %}
-    <div class='main-content'>
-        {{ post.body }}
+  <div class='main-content'>
+    <p>{{ post.body }} </p>
+  </div>
+  <br>
+  {% if picture %}
+    <div class="image">
+      <img class="img-thumbnail post-img" src="{{ url_for('posts.uploaded_file', filename=picture) }}" alt="test">
     </div>
+  {% endif %}
     <br>
-    {% if picture %}
-        <img src="{{ url_for('posts.uploaded_file', filename=picture) }}" alt="test">
-    {% endif %}
-    <br>
-    {% if tags %}
-        <div class='tags'>
-            {% for tag in tags %}
-                <a href="{{ url_for('posts.tag_detail', slug=tag.slug) }}"><button type="button" class="btn btn-info btn-sm">{{ tag.name }}</button> </a>
-            {% endfor %}
-        </div>
-    {% endif %}
-
+  {% if tags %}
+    <div class='tags'>
+      {% for tag in tags %}
+        <a href="{{ url_for('posts.tag_detail', slug=tag.slug) }}">
+          <button type="button" class="btn btn-info btn-sm">
+            {{ tag.name }}
+          </button>
+        </a>
+      {% endfor %}
+    </div>
+  {% endif %}
 {% endblock %}
 

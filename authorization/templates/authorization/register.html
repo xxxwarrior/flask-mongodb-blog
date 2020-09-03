@@ -10,5 +10,5 @@
 
 {% block content %}
   {% from 'posts/form_macro.html' import form_macro %}
-  {{ form_macro(form, action=url_for('posts.register'), btn_name='Register') }}
+  {{ form_macro(form, action=url_for('authorization.register'), btn_name='Register') }}
 {% endblock content %}

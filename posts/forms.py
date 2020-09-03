@@ -30,14 +30,3 @@ class PostForm(Form):
     tags = TagListField('Tags')
     picture = FileField('Picture')
 
-
-class LoginForm(FlaskForm):
-    email = StringField('Email Address')
-    password = PasswordField('Password')
-
-class RegisterForm(Form):
-    name = StringField('Your name')
-    email = StringField('Email Address')
-    password = PasswordField('Password')
-    
-

@@ -5,24 +5,25 @@
 {% endblock %}
  
 {% block content_title %}
-  <h1 class='text-center'>{{ _('Login') }}</h1>
+  <h1 class='text-center'>{{ ('Login') }}</h1>
 {% endblock %}
 
 {% block content %}
 
   <div class='col-md-6 container justify-content-center'>
-    {% from "security/_macros.html" import render_field_with_errors, render_field %}
-    {% include "security/_messages.html" %}
-    <form action="{{ url_for('posts.login') }}" method="POST" name="login_user_form">
+    {% from "authorization/_macros.html" import render_field_with_errors, render_field %}
+    {% include "authorization/_messages.html" %}
+    <form action="{{ url_for('authorization.login') }}" method="POST" name="login_user_form">
       {{ login_user_form.hidden_tag() }}
       {{ render_field_with_errors(login_user_form.email, class='form-control') }}
       {{ render_field_with_errors(login_user_form.password, class='form-control') }}
       {{ render_field_with_errors(login_user_form.remember) }}
-      {{ render_field(login_user_form.next) }}
-      {{ render_field(login_user_form.submit, class='btn btn-success') }}
+      <div class="col text-center">
+        <button type="submit" class="btn btn-info btn-lg"> Login </button>
+      </div>
     </form>
     <i>Not registered yet?</i>
-      <a href="{{ url_for('posts.register') }}">
+      <a href="{{ url_for('authorization.register') }}">
         <button type='button' class='btn btn-outline-dark btn-sm'>Register</button> 
       </a>    
   </div>

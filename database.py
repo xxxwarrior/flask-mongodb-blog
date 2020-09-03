@@ -9,7 +9,7 @@ from mongoengine import connect, Document, IntField, \
                         StringField, BooleanField, ReferenceField, \
                         ListField, DateTimeField, LazyReferenceField, \
                         EmbeddedDocument, EmbeddedDocumentListField, \
-                        FileField
+                        FileField, BinaryField
                         
 
 from config import Config
@@ -45,7 +45,6 @@ class User(Document, UserMixin):
 
     def is_active(self):
         return True
-=
 
 
 

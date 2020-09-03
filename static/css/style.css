@@ -9,15 +9,15 @@ h1 {
 a {
     color: #05508c 
 }
+body {
+    padding-block-end: 50px;
+    /* padding-bottom: 50px; */
+}
 
 a.nav-link {
     color: #3200ca8a
 }
 
-
-/* div.container {
-    align-items: center
-} */
-
-
-
+.post-img {
+    width: 44%;
+}

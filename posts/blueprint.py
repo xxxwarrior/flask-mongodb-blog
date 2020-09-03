@@ -5,75 +5,19 @@ from werkzeug.utils import secure_filename
 from flask import Blueprint, render_template, request, \
                   redirect, url_for, session, flash, \
                   send_from_directory
-from flask_security import login_required, logout_user
-from flask_login import current_user, login_user
-
+from flask_login import current_user, login_required
 from mongoengine import ValidationError
-from mongoengine.errors import NotUniqueError
 from mongoengine.queryset.visitor import Q
 
 from database import Post, User, Tag, slugify
-from .forms import PostForm, LoginForm, RegisterForm
-from app import app, bcrypt, security, login_manager, client
+from .forms import PostForm
+from app import app
 
 
 posts = Blueprint('posts', __name__, template_folder='templates')
-authorization = Blueprint('authorization', __name__)
+
 
 file_path = app.config['UPLOAD_FOLDER'] + r'\\' 
-
-
-
-
-###--- Authorization views ---###
-
-@authorization.route('/login', methods=['POST', 'GET'])
-def login():
-    form = LoginForm()
-    if request.method == 'POST':
-        if form.validate_on_submit:  
-            user = User.objects(email=form.email.data).first()
-            if user:
-                if bcrypt.check_password_hash(user.password, form.password.data):
-                    current_user = user
-                    login_user(user)
-                    session['user'] = user
-                    flash("You logged in succesfully")
-        return redirect(url_for('posts.index'))
-        
-    return render_template('security/login_user.html', form=form)
-    
-
-@authorization.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST': 
-        try:
-            name = request.form.get('name')
-            email = request.form.get('email')
-            password = request.form.get('password')
-            pw_hash = bcrypt.generate_password_hash(password)
-            usr = User(name=name, email=email, password=pw_hash)
-            usr.save()
-            flash("Your registration was succesfull")
-            return redirect('/login')
-        except NotUniqueError:
-            flash("This email is already registered", "error")
-        except Exception as e:
-            print(e)
-            print(type(e))
-    form = RegisterForm()
-    return render_template('security/register_user.html', form=form)
-
-
-@authorization.route('/logout')
-def logout():
-    user = current_user
-    user.authenticated = False
-    logout_user()
-    flash("You are not logged in now")
-    return redirect(url_for('posts.index'))
-
-
 
 
 
@@ -182,28 +126,39 @@ def index():
     q = request.args.get('q')
     page = request.args.get('page')
 
+    print(current_user.is_authenticated)
+
+
     if page and page.isdigit():
         page = int(page)
     else: page = 1
 
-    total_posts = Post.objects.count()
-    posts_per_page = 5
-    total_pages = ceil(total_posts / posts_per_page)
+    posts_count = Post.objects.count()
+    rows_per_page = 3
+    posts_per_row = 4
+    posts_per_page = rows_per_page * posts_per_row
+    total_pages = ceil(posts_count / posts_per_page)
     skip = (page-1) * posts_per_page
+    print('skip', skip)
+    print('total pages', total_pages)
 
     if q: 
         posts = Post.objects(Q(title__icontains=q) | 
                              Q(body__icontains=q)).order_by('-date').skip(skip).limit(posts_per_page)
     else: 
         posts = Post.objects.order_by('-date').skip(skip).limit(posts_per_page)
+        posts = [post for post in posts]
+        # posts = Post.objects.order_by('-date')
+            
 
-    return render_template('posts/index.html', posts=posts, page=page, totalPages=total_pages)
+    return render_template('posts/index.html', posts=posts, rows_per_page=rows_per_page, posts_per_row=posts_per_row, page=page, totalPages=total_pages)
 
 
 @posts.route('/uploads/<filename>')
 def uploaded_file(filename):
-    """ Downloads a file from a static directory """
-
+    """ Downloads a file from a static directory """ 
+    #-- This function is called by html template to display post picture --#
+    print('>>>>>>>>>>>>>>>>>>>>>>')
     return send_from_directory(file_path, filename)
 
 
@@ -214,15 +169,22 @@ def post_detail(slug):
     try: 
         post = Post.objects(slug=slug).first()
         tags = post.tags
+        print('>>> post_detail')
         
         if post.picture and post.pic_name:
             filename = post.pic_name
+            print('>>filename', filename)
         else: filename = None
         try: 
             user = post.user.fetch()
             user_id = str(user.id)
+            print("USER ID SUCCESS", user_id)
         except AttributeError:
             user_id = None
+            print("USER ID FAIL", user_id)
+        
+        print("USER ID BEFORE RENDER", user_id)
+        print(f'post {post}, tags {tags}, pic {filename}')
 
         return render_template('posts/post_detail.html', post=post, tags=tags, picture=filename, author_id=user_id)
     except:
