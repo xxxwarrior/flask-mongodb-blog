@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  {{ post.title }}
+{% endblock %}
+
+<div class='bg-im'> 
+{% block content_title %}
+  {{ post.title }}
+  {% if current_user.is_authenticated %}
+    {% if post_author == current_user.get_id() or current_user.has_role('admin') %}
+      <a  href=" {{url_for('posts_bp.edit_post', slug=post.slug) }} ">
+        <button type="button" class="btn btn-outline-secondary btn-sm">Edit Post</button>
+      </a>
+    {% endif %}   
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+  <div class='main-content'>
+    <p>{{ post.body }}</p>
+  </div>
+  {% if tags %}
+    <div class='tags'>
+      {% for tag in tags %}
+        <a href="{{ url_for('posts_bp.tag_detail', slug=tag.slug) }}">
+          <button type="button" class="btn btn-info btn-sm">
+            {{ tag.name }}
+          </button>
+        </a>
+      {% endfor %}
+    </div>
+  {% endif %}
+  {% if picture %}
+  <div class="image"> 
+    <img class="img-thumbnail post-img" src="{{ url_for('posts_bp.download_file', filename=picture) }}" alt="picture">
+  </div>
+  {% endif %}
+  <br>
+  <div class='col-md-6 container justify-content-center border border-info padding-25'>
+    {% if current_user.is_authenticated %}
+      <form action="{{ url_for('posts_bp.post_detail', slug=post.slug) }}" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+          <h6 class="mt-0 info-text"> {{ form.comment.label(class='control-label') }} </h6>
+            {% if form.comment.errors %}
+              {{ form.comment(class="form-control form-control-lg is-invalid") }}
+                <div class="invalid-feedback">
+                  {% for error in form.comment.errors %}
+                    <span>{{ error }}</span>
+                  {% endfor %}
+                </div>
+            {% else %}
+              <div class="input-group mb-3"> 
+                <input name="comment" type="text" class="form-control" aria-label="comment" aria-describedby="inputGroup-sizing-lg">
+                <div class="input-group-append"> 
+                  <button type="submit" class="btn btn-outline-info btn-md"> Post </button>
+                </div>  
+              </div>
+            {% endif %}
+        </div>  
+      </form>
+    {% endif %}
+    {% if comments %}
+      <ul class="list-unstyled">
+        {% for comment in comments %}
+          <li class="media border-bottom border-info">
+            <!-- <img src="..." class="mr-3" alt="..."> -->
+            <div class="media-body">
+              <h6 class="mt-0 mb-1 pink-text"> {{ comment.author.name }}: </h6>
+              <span class="small-date"> {{ comment.date }} </span>
+              <ul class="list-group list-group-horizontal">
+                <li class="list-group-item flex-fill  border-0">
+                  <p style="font-size:130%;">{{ comment.body }}</p>
+                </li>
+                {% if current_user.is_authenticated and current_user.get_id() == comment.author.id|string %}
+                  <li class="list-group-item  border-0">
+                    <a href=" {{ url_for('posts_bp.delete_comment', slug=post.slug, comment_id=comment.oid) }}">
+                      <button type="button" class="btn btn-default btn-sm" aria-label="Delete comment">
+                        <img src=" {{ url_for('static', filename='icons/trash.svg') }}" class="icon" title="Delete comment">
+                      </button>
+                    </a>
+                    <a  href="">                  
+                      <button type="button" class="btn btn-default btn-sm" aria-label="Edit comment"disabled>
+                        <img src=" {{ url_for('static', filename='icons/pencil.svg') }}" class="icon" title="Edit comment">
+                      </button>
+                    </a>
+                  </li>
+                {% endif %}
+              </ul>
+            </div>
+          </li>
+        {% endfor %}
+      </ul> 
+    {% endif %}
+  </div>
+{% endblock %}
+</div>

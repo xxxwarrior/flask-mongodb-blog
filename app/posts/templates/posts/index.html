@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Posts
+{% endblock %}
+
+{% block content_title %}
+  Posts
+{% endblock %}
+
+{% block content %}
+  <!-- Values 'from' and 'to' indicate indexes of the posts to display -->
+  {% set from = namespace(value=0)  %}
+  {% set to = namespace(value=posts_per_row) %}
+
+  {% for row in range(rows_per_page)  %}
+    <ul class="list-group list-group-horizontal-xl ">
+      {% for post in posts[from.value:to.value] %}
+        <li class="list-group-item d-flex w-100 align-items-center border-0 light-bg">
+          <a href="{{ url_for('posts_bp.post_detail', slug=post.slug)}}" class="list-group-item list-group-item-action flex-column align-items-center blue-border rounded-sm post-el" style="display: flex; flex-direction: column"> 
+            <span class="blue-text">{{ post.title }}</span>
+            {% if post.pic_name %}
+              <img class="img-thumbnail" src="{{ url_for('posts_bp.download_file', filename=post.pic_name) }}" style="width:100px;">
+            {% endif %}
+          </a> 
+        </li>
+      {% endfor %}
+    </ul>
+    {% set from.value = to.value  %}
+    {% set to.value = to.value + posts_per_row  %}
+  {% endfor %}
+  <br>
+  <!--Pagination-->
+  <br>
+  <nav aria-label="Page navigation example">
+    <ul class="pagination justify-content-center">
+      <li {% if page == 1 %} class="page-item disabled" {% endif %}>
+        <a class="page-link" href="./?page={{ page-1 }}" aria-label="Previous">
+          <span aria-hidden="true">&laquo;</span>
+        </a>
+      </li>
+      {% for page in range(1, totalPages+1) %}
+        <li class="page-item"><a class="page-link" href="./?page={{ page }}"> {{ page }} </a></li>
+      {% endfor %}
+      <li {% if page == totalPages %} class="page-item disabled" {% endif %}>
+        <a class="page-link" href="./?page={{ page+1 }}" aria-label="Next">
+          <span aria-hidden="true">&raquo;</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+{% endblock %}
+

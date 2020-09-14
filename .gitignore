@@ -3,3 +3,9 @@ __pycache__/
 **/__pycache__/
 
 draft.py
+static/upload/*
+
+.git
+.env
+.blog
+myproject.egg-info
