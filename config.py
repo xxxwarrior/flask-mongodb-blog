@@ -5,6 +5,7 @@ from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv())
 
+
 class Config(object):
     DEBUG = True
     TEMLATES_AUTO_RELOAD = True
@@ -15,6 +16,8 @@ class Config(object):
     SECRET_KEY = environ.get('SECRET_KEY')
     SESSION_TYPE = 'mongodb'
     SESSION_MONGODB = MongoClient(MONGODB_HOST)
+
+    DB = 'deploy'
     
     STATIC_FOLDER = 'static'
     UPLOAD_FOLDER = environ.get('UPLOAD_FOLDER')
@@ -22,5 +25,10 @@ class Config(object):
     # Flask Security
     SECURITY_PASSWORD_SALT = environ.get('SALT')
     SECURITY_PASSWORD_HASH = 'bcrypt'
+
+class TestConfig(Config):
+    TESTING = True
+    DB = 'test'
+
  
     
