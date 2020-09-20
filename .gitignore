@@ -1,11 +1,18 @@
 .vscode/
 __pycache__/
 **/__pycache__/
+.pytest_cache
+
+assets*
+htmlcov*
 
 draft.py
-static/upload/*
+app/static/upload/*
 
 .git
 .env
 .blog
+.coverage
 myproject.egg-info
+
+report.html
