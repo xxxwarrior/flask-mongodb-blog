@@ -3,9 +3,9 @@ import os
 
 from werkzeug.utils import secure_filename
 from bson.objectid import ObjectId
-from flask import Blueprint, render_template, request, \
-                  redirect, url_for, session, flash, \
-                  send_from_directory, current_app
+from flask import render_template, request, redirect, \
+                  url_for, flash, send_from_directory,\
+                  current_app
 from flask_login import current_user, login_required
 from mongoengine import ValidationError
 from mongoengine.queryset.visitor import Q
@@ -26,9 +26,11 @@ def make_tags(tags_str: str) -> list:
             tag_list.append(tag)
     return tag_list
 
+
 def is_allowed_file(filename):
     allowed_ext = {'png', 'jpeg', 'jpg', 'gif'}
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_ext
+
 
 # For now it's for pics only, might remake later
 def attach_file(post, file):
@@ -41,7 +43,11 @@ def attach_file(post, file):
     with open(file_path + filename, 'rb') as f:
         post.picture.put(f, content_type='image/jpeg')
 
-
+flashes = {
+    'error': "An error occured, please try again later.",
+    'badformat': "The file format is not supported.",
+    'nofile': "The file was not selected."
+}
 
 #-/ Add new post view \-#
 # http://localhost/blog/create
@@ -54,7 +60,7 @@ def create_post():
         title = request.form.get('title')
         body = request.form.get('body')
         tags = request.form.get('tags')
-        file = request.files['file']
+        file = request.files.get('file')
         user = User.objects(id=current_user.get_id()).first()
         try:
             post = Post(title=title, body=body, user=user)
@@ -63,24 +69,20 @@ def create_post():
             if file: 
                 filename = file.filename
                 if not is_allowed_file(filename):
-                    flash("The file format is not supported", "error")
+                    flash(flashes['badformat'])
                 elif filename == '':
-                    flash("No selected file", "error")
-
+                    flash(flashes['nofile'], "error")
                 attach_file(post, file)
             else: filename = None
             post.save()
-        except Exception as e:
-            print(f"Something went wrong: {e}")
-
-            flash("An error occured, please try again", "error")
+        except Exception:
+            flash(flashes['error'], "error")
             return render_template('posts/create_post.html', form=form)
         
         flash("Your post has been successfully created", "message")
         return redirect(url_for('posts_bp.index'))
 
     return render_template('posts/create_post.html', form=form)
-
 
 
 
@@ -98,27 +100,25 @@ def edit_post(slug):
             title = request.form.get('title')
             body = request.form.get('body')
             tags = request.form.get('tags')
-            file = request.files['file']
-            filename = request.files['file'].filename
+            file = request.files.get('file')
             try:
                 post.update(title=title, slug=slugify(title), body=body)
                 if tags:
                     post.tags = make_tags(tags)
                 if file:
+                    filename = file.filename
                     if not is_allowed_file(filename):
-                        flash("The file format is not supported", "error")
+                        flash(flashes['badformat'])
                     elif filename == '':
-                        flash("No selected file", "error")
+                        flash(flashes['nofile'], "error")
                     
                     attach_file(post, file)
-
                 post.save() 
             except ValidationError:
-                flash("An error occured. The title might too long, please try again", "error")
+                flash("An error occured. The title might be too long.", "error")
                 return render_template('posts/edit_post.html', post=post, tags=tags, form=form)
-            except Exception as e:
-                flash("An error occured, please try again", "error")
-                print(f"Something went wrong: {e}, type: {type(e)}")
+            except Exception:
+                flash(flashes['error'], "error")
                 return render_template('posts/edit_post.html', post=post, tags=tags, form=form)
 
             flash("You've edited your post successfully", "message")
@@ -129,9 +129,8 @@ def edit_post(slug):
         else: tags=""
         return render_template('posts/edit_post.html', post=post, tags=tags, form=form)
 
-    except Exception as e:
-        print(f'>>> {e}')
-        flash("An error occured, please try again", "error")
+    except Exception:
+        flash(flashes['error'], "error")
         return render_template('404.html'), 404
 
 
@@ -177,20 +176,17 @@ def download_file(filename):
 # http://localhost/blog/first-post
 @posts_bp.route('/<slug>', methods=['POST', 'GET'])
 def post_detail(slug):
-
     try: 
         post = Post.objects(slug=slug).first()
-        tags = post.tags
+        tags = post.tags if post.tags else []
     
         if post.picture and post.pic_name:
             filename = post.pic_name
         else: filename = None
         try: 
             user = post.user.fetch()
-            print(user)
             user_id = str(user.id)
-        except Exception as e:
-            print(f'user fail happend: {e}, {type(e)}')
+        except Exception:
             user_id = None
 
         form = CommentForm()
@@ -206,21 +202,19 @@ def post_detail(slug):
 
         return render_template('posts/post_detail.html', post=post, tags=tags, picture=filename, post_author=user_id, \
                                                         form=form, comment_author=comment_author, comments=post.comments[::-1])
-    except Exception as e:
-        print(f'fail happend: {e}, {type(e)}')
+    except Exception:
         return render_template('404.html'), 404
 
 
 #-/ Tag search view \-#
-# http://localhost/blog/tag/fuck
+# http://localhost/blog/tag/sometag
 @posts_bp.route('/tag/<slug>')
 def tag_detail(slug):
     try: 
         posts = Post.objects(tags__match={'slug': slug})
         tag = posts[0].tags.get(slug=slug)
         return render_template('posts/tag_detail.html', tag=tag, posts=posts)
-    except Exception as e:
-        print(f">>>{e}")
+    except Exception:
         return render_template('404.html'), 404
 
 
@@ -231,12 +225,6 @@ def delete_comment(slug, comment_id):
         comment_id = ObjectId(comment_id)
         post.update(pull__comments__oid=comment_id)
         post.save()
-    except Exception as e:
-        print('fail happened while trying to delete a comment:')
-        print(f'{type(e)}: {e}')
-        flash('An error occured, please try again later', 'error')
+    except Exception:
+        flash(flashes['error'], 'error')
     return redirect(url_for('posts_bp.post_detail', slug=slug))
-
-
-
-
