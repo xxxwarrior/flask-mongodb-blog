@@ -3,19 +3,19 @@ from datetime import datetime
 
 from bson.objectid import ObjectId
 from flask_security import UserMixin, RoleMixin
-from mongoengine import connect, Document, IntField, \
-                        StringField, BooleanField, ReferenceField, \
-                        ListField, DateTimeField, LazyReferenceField, \
-                        EmbeddedDocument, EmbeddedDocumentListField, \
-                        FileField, BinaryField, ObjectIdField             
+from mongoengine import Document, connect, StringField, BooleanField,\
+                        ReferenceField, ListField, DateTimeField, \
+                        LazyReferenceField, FileField, ObjectIdField, \
+                        EmbeddedDocument, EmbeddedDocumentListField    
+from werkzeug.security import generate_password_hash, check_password_hash         
 
 from config import Config
 
-connect(
-    db='deploy',
-    alias='default',
-    host="mongodb+srv://Admin:Admin1@cluster0-6fxtf.mongodb.net/?retryWrites=true&w=majority&ssl=true&ssl_cert_reqs=CERT_NONE"
-)
+
+def get_db(app):
+    client = app.config['SESSION_MONGODB']
+    db = client[app.config['DB']]
+    return db
 
 ##--// User Management \\--##
 class Role(Document, RoleMixin): 
@@ -35,6 +35,12 @@ class User(Document, UserMixin):
 
     def is_active(self):
         return True
+
+    def set_password(self, password):
+        self.password = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
 
 
 

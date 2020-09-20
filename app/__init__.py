@@ -2,18 +2,13 @@ from flask import Flask
 from flask_session import Session 
 from flask_login import LoginManager
 from flask_bcrypt import Bcrypt
-from mongoengine import connect
-
+from mongoengine import connect, disconnect
 
 from config import Config, TestConfig
-
-
 
 session = Session()
 login_manager= LoginManager()
 
-# These variables are used in the app's blueprints
-bcrypt = None
 
 def create_app(config=None):  
     app = Flask(__name__) 
@@ -22,6 +17,9 @@ def create_app(config=None):
         if config is not None:
             app.config.from_object(config)
         else: app.config.from_object(Config)
+
+        disconnect(            
+            alias='default')
 
         connect(
             db=app.config['DB'],
@@ -32,9 +30,6 @@ def create_app(config=None):
         session.init_app(app)
         login_manager.init_app(app)  
         login_manager.login_view = 'authorization.login'
-
-        global bcrypt
-        bcrypt = Bcrypt(app)
 
         from app.main import bp as main_bp
         app.register_blueprint(main_bp)
@@ -47,7 +42,6 @@ def create_app(config=None):
         
         from app.authorization import auth_bp
         app.register_blueprint(auth_bp)
-
     
     return app
 
