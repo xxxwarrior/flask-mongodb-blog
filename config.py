@@ -29,6 +29,8 @@ class Config(object):
 class TestConfig(Config):
     TESTING = True
     DB = 'test'
+    DEBUG = False
+    WTF_CSRF_ENABLED = False
 
  
     
