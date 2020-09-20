@@ -34,6 +34,11 @@ def test_registration(client, app):
     rv = registrate(client, user['name'], user['email'], user['password'])
     assert b"Your registration was succesfull" in rv.data
 
+def test_duplicate_registration(client):
+    rv = registrate(client, user['name'], user['email'], user['password'])
+    assert b"This email is already registered" in rv.data
+
+
 def test_login(client):
     rv = login(client, user['email'], user['password'])
     assert b"You logged in succesfully" in rv.data
