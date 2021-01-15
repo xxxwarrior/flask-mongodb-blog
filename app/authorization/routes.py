@@ -17,6 +17,18 @@ def user_loader(user_id):
         return user
     return
 
+
+
+flashes = {
+    "invalid": "Invalid email or password!",
+    "login": "You logged in succesfully!",
+    "registered": "Your registration was succesfull!",
+    "notUnique": "This email is already registered!",
+    "error": "An error occured, please try again later.",
+    "logout": "You are not logged in now!"
+}
+
+
 @auth_bp.route('/login', methods=['POST', 'GET'])
 def login():
     form = LoginForm()
@@ -26,14 +38,14 @@ def login():
             user = User.objects(email=form.email.data).first()
             
             if not user:
-                flash("Invalid email or password", "error")
+                flash(flashes["invalid"], "error")
                 return render_template('authorization/login.html', login_user_form=form)
             elif user.check_password(form.password.data) == False:
-                flash("Invalid email or password", "error")
+                flash(flashes["invalid"], "error")
                 return render_template('authorization/login.html', login_user_form=form)
             
             login_user(user)
-            flash("You logged in succesfully")   
+            flash(flashes["login"])   
 
         return redirect(url_for('posts_bp.index'))
         
@@ -50,12 +62,12 @@ def register():
             usr = User(name=name, email=email)
             usr.set_password(password)
             usr.save()
-            flash("Your registration was succesfull")
+            flash(flashes["registered"])
             return redirect('/login')
         except NotUniqueError:
-            flash("This email is already registered", "error")
+            flash(flashes["notUnique"], "error")
         except Exception:
-            flash("An error occured, please try again later")
+            flash(flashes["error"])
     form = RegisterForm()
     return render_template('authorization/register.html', form=form)
 
@@ -65,7 +77,7 @@ def logout():
     user = current_user
     user.authenticated = False
     logout_user()
-    flash("You are not logged in now")
+    flash(flashes["logout"])
     return redirect(url_for('posts_bp.index'))
 
 
