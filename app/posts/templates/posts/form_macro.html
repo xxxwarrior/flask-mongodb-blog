@@ -1,7 +1,7 @@
 {% macro form_macro(form, action, btn_name, tags="") -%}
     <div class='col-md-6 container justify-content-center'>
         <form action="{{ action }}" method="POST" enctype="multipart/form-data">
-            {% for field in form  %}
+            {% for field in form if field.widget.input_type != 'hidden'%}
                 <div class="form-group">
                     {{ field.label(class='control-label') }}
                     {% if field.name == 'tags' %} 
