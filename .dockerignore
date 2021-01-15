@@ -1,0 +1,17 @@
+.vscode/
+__pycache__/
+**/__pycache__/
+.pytest_cache
+
+assets*
+htmlcov*
+
+draft.py
+app/static/upload/*
+
+.git
+.blog
+.coverage
+myproject.egg-info
+
+report.html
