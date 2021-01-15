@@ -27,9 +27,11 @@ def make_tags(tags_str: str) -> list:
     return tag_list
 
 
+
 def is_allowed_file(filename):
     allowed_ext = {'png', 'jpeg', 'jpg', 'gif'}
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_ext
+
 
 
 # For now it's for pics only, might remake later
@@ -43,11 +45,16 @@ def attach_file(post, file):
     with open(file_path + filename, 'rb') as f:
         post.picture.put(f, content_type='image/jpeg')
 
+        
+
 flashes = {
+    'created': "Your post has been successfully created!",
+    'edited': "You've edited your post successfully!",
     'error': "An error occured, please try again later.",
     'badformat': "The file format is not supported.",
     'nofile': "The file was not selected."
 }
+
 
 #-/ Add new post view \-#
 # http://localhost/blog/create
@@ -79,7 +86,7 @@ def create_post():
             flash(flashes['error'], "error")
             return render_template('posts/create_post.html', form=form)
         
-        flash("Your post has been successfully created", "message")
+        flash(flashes['created'], "message")
         return redirect(url_for('posts_bp.index'))
 
     return render_template('posts/create_post.html', form=form)
@@ -87,7 +94,6 @@ def create_post():
 
 
 #-/ Edit a post view \-# 
-
 #TODO This document already has a file. Either delete it or call replace to overwrite it, type: <class 'mongoengine.fields.GridFSError'> 
 @posts_bp.route('/edit/<slug>', methods=['POST', 'GET'])
 @login_required
@@ -121,7 +127,7 @@ def edit_post(slug):
                 flash(flashes['error'], "error")
                 return render_template('posts/edit_post.html', post=post, tags=tags, form=form)
 
-            flash("You've edited your post successfully", "message")
+            flash(flashes['edited'], "message")
             return redirect(url_for('posts_bp.post_detail', slug=post.slug))
 
         if post.tags:

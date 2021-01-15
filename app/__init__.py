@@ -18,8 +18,7 @@ def create_app(config=None):
             app.config.from_object(config)
         else: app.config.from_object(Config)
 
-        disconnect(            
-            alias='default')
+        disconnect(alias='default')
 
         connect(
             db=app.config['DB'],

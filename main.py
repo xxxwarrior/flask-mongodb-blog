@@ -11,4 +11,4 @@ admin = Admin(app, 'FlaskApp', url='/', index_view=HomeAdminView(name='home'))
 admin.add_view(AdminView(Post, name='Posts'))
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0')

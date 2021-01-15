@@ -6,7 +6,6 @@ import pytest
 from config import TestConfig
 from app import create_app
 
-
 @pytest.fixture
 def app():
     app = create_app(TestConfig)

@@ -17,6 +17,7 @@ def get_db(app):
     db = client[app.config['DB']]
     return db
 
+
 ##--// User Management \\--##
 class Role(Document, RoleMixin): 
 

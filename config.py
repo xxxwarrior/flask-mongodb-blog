@@ -17,7 +17,7 @@ class Config(object):
     SESSION_TYPE = 'mongodb'
     SESSION_MONGODB = MongoClient(MONGODB_HOST)
 
-    DB = 'deploy'
+    DB = 'myDatabase'
     
     STATIC_FOLDER = 'static'
     UPLOAD_FOLDER = environ.get('UPLOAD_FOLDER')

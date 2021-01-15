@@ -17,8 +17,7 @@ def registrate(client, name, email, password):
         ), follow_redirects=True)
 
 def delete_user(db, usr):
-    if db.user.find_one({'name': usr['name']}):
-        db.user.delete_one({'name': usr['name']})
+    db.user.delete_one({'name': usr['name']})
 
 user = {
     'name': 'TestName',
@@ -53,6 +52,10 @@ def test_wrong_login(client):
 
     rv = login(client, user['email'], user['password']+'meh')
     assert b"Invalid email or password" in rv.data
+
+
+
+
 
 
 

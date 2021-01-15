@@ -28,23 +28,17 @@ class PostView(ModelView):
 
     form = PostForm
 
-    def get_list(self, *args, **kwargs):
-        
-        count, data = super(PostView, self).get_list(*args, **kwargs)
-        print(f'>>> count: {count}')
-        print(f'>>> data: {data}')
-
-        # users = User.objects(_id__in=[x['_id'] for x in data]).fields(_id=1, name=1)
-        # users_map = dict((x['_id'], x['name']) for x in users)
-
-        # for item in data:
-        #     item['user_name'] = users_map.get(item['_id'])
-
-        return count, data
+# The users are not shown in admin view, might add them
+    # def get_list(self, *args, **kwargs):
+    #     count, data = super(PostView, self).get_list(*args, **kwargs)
+    #     # users = User.objects(_id__in=[x['_id'] for x in data]).fields(_id=1, name=1)
+    #     # users_map = dict((x['_id'], x['name']) for x in users)
+    #     # for item in data:
+    #     #     item['user_name'] = users_map.get(item['_id']
+    #     return count, data
 
     def on_model_change(self, form, model, is_created):
         # user_id = model.user.id
-        print(model)
         # model['user_id'] = ObjectId(user_id)
 
         model['slug'] = slugify(model['title'])
