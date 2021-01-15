@@ -4,7 +4,6 @@ from wtforms.widgets import TextInput
 from flask_wtf.file import FileField
 from flask_wtf import FlaskForm
 
-from app.database import Tag
 
 
 class TagListField(Field):
@@ -15,14 +14,8 @@ class TagListField(Field):
             tags = [tag.name for tag in self.data]
             return ', '.join(tags)
         else:
-            return u''
+            return ''
 
-    def process_formdata(self, valuelist):
-        self.data = []
-        if valuelist:
-            valuelist = "".join(valuelist).split(", ")
-            for value in valuelist:
-                self.data.append(Tag(name=value)) 
 
 class PostForm(FlaskForm):
     title = StringField('Title')
