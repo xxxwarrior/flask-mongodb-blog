@@ -25,7 +25,8 @@
           <span class="sr-only">(current)</span></a>
         </li>
         <li class="nav-item">
-          {% if current_user.is_authenticated == True and current_user.has_role('admin') %}
+          {% if current_user.is_authenticated == True %} 
+          <!-- and current_user.has_role('admin')  -->
             <a class="nav-link" href="{{ url_for('posts_bp.create_post') }}">+New Post</a>
           {% endif %}
         </li>
