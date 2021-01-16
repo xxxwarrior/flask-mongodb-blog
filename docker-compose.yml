@@ -8,6 +8,8 @@ services:
       - "5000:5000"
     volumes: 
       - .:/flask-app
+    environment: 
+      - DB_URI=mongodb://db:27017
     depends_on:
       - db
 
