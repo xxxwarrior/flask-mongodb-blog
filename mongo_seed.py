@@ -13,7 +13,6 @@ from app.database import User, Post
 
 load_dotenv(find_dotenv())
 host = environ.get('DB_URI')
-print('yep')
 
 disconnect(alias='default')
 connect(
@@ -21,15 +20,12 @@ connect(
     alias='default',
     host=host
 )
-print('hm')
 
 if not Post.objects(title="demopost"):
-    print('hey')
     Post(title="demopost", body="demobody").save()
 
 
 if not User.objects(name="admin"): 
-    print('yey')
     client = MongoClient(host)
     db = client.myDatabase
 
@@ -39,8 +35,6 @@ if not User.objects(name="admin"):
     usr = User.objects(name="admin").modify(upsert=True, new=True, set__email="admin", set__roles=[admin_role])
     usr.set_password("1234")
     usr.save()
-
-print('ts')
 
 
 
