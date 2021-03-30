@@ -40,7 +40,7 @@ passlib==1.7.2
 pickleshare==0.7.5
 prompt-toolkit==3.0.5
 pycparser==2.20
-Pygments==2.6.1
+Pygments==2.7.4
 pylint==2.5.3
 pymongo==3.10.1
 pytest==6.0.2
